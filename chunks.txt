@@ -1,0 +1,28 @@
+Useful Chunk Indexes
+====================
+
+  [000]: Header (magic numbers?)
+  [001]: Uncompressed hud background image
+  [002]: Font/text box images
+  [003]: Base palette (first 16 colors)
+  [004]: Hud Erik selected image
+  [005]: Hud Baleog selected image
+  [006]: Hud Olaf selected image
+  [007]: Hud Erik gray image
+  [008]: Hud Baleog gray image
+  [009]: Hud Olaf gray image
+  [010]: Hud Erik dead image
+  [011]: Hud Baleog dead image
+  [012]: Hud Olaf dead image
+  [013]: Hud health images
+  [014]: Hud item images
+
+Chunks 18...219 (approx) store level data (header, tileset, palette, map).
+
+Chunks 220...378 (approx) store sprites. These are mostly in packed32 and
+unpacked (various sizes) formats.
+
+Chunks 379...454 (approx) store special levels, splash screens, etc.
+The special levels include the company logos, demo, ending, etc.
+
+Chunks 455+ (approx) store music tracks.
