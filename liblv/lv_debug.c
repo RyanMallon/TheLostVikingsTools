@@ -25,8 +25,10 @@ void lv_debug(unsigned level, const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    if (debug_flags & level)
+    if (debug_flags & level) {
         vprintf(fmt, args);
+        printf("\n");
+    }
     va_end(args);
 }
 
