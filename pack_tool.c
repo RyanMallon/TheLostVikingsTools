@@ -150,6 +150,7 @@ static void add_operation(operation_func_t func, unsigned chunk_index,
 
 static void repack(const char *filename)
 {
+    uint32_t final;
     FILE *fd;
     int i;
 
@@ -163,8 +164,10 @@ static void repack(const char *filename)
         fatal_error("Cannot open file for repack");
 
     /* Write out the chunk headers */
-    for (i = 0; i <= pack.num_chunks; i++)
+    for (i = 0; i < pack.num_chunks; i++)
         fwrite(&pack.chunks[i].start, sizeof(pack.chunks[i].start), 1, fd);
+    final = pack.chunks[i - 1].start + pack.chunks[i - 1].size;
+    fwrite(&final, sizeof(final), 1, fd);
 
     /* Write out the chunk data */
     for (i = 0; i < pack.num_chunks; i++)
