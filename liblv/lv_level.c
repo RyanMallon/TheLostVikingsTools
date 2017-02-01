@@ -283,6 +283,16 @@ static int load_objects(struct lv_level *level, struct buffer *buf)
 {
     uint16_t xoff, yoff, half_width, half_height, type, flags, arg;
 
+    /*
+     * Object entries (14 bytes):
+     *   [00] u16: xoffset - 0xffff ends
+     *   [02] u16: yoffset
+     *   [04] u16: width / 2
+     *   [06] u16: height / 2
+     *   [08] u16: type (in object database)
+     *   [0a] u16: flags
+     *   [0c] u16: argument
+     */
     lv_debug(LV_DEBUG_LEVEL, "Loading objects:");
     while (1) {
         buffer_get_le16(buf, &xoff);
