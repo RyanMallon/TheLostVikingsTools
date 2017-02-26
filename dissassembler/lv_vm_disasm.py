@@ -339,6 +339,8 @@ class Disassembler(object):
 
     def parse_instruction(self, func):
         addr = self.code.offset
+        if addr >= len(self.code.data):
+            return None
 
         operands = {}
         instr = Instruction(self.code, func, self.code.offset)
@@ -1000,7 +1002,7 @@ class Disassembler(object):
             #
             while True:
                 opcode = self.parse_instruction(func)
-                if opcode in end_opcodes:
+                if opcode is None or opcode in end_opcodes:
                     break
 
             #
