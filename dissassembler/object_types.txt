@@ -1,0 +1,88 @@
+Lost Vikings Object List
+========================
+
+Incomplete list of objects for each world. The objects which are present in
+multiple worlds (switches, teleports, etc) are only listed for the first
+world.
+
+Space World (Chunk 449)
+-----------------------
+
+  04: Gun turret
+  05: Turret bullet
+  07: Baleog arrow
+  08: Fire arrow
+  0b: Dialog box (text="password")
+  0c: Bullet explosion
+  1a: Key slot
+  1d: Collectible
+  1e: Big collectible (steak)
+  17: Button (triggers laser)
+  1f: Button
+  20: Question box
+  3c: Janitor alien
+  3f: Level exit dialog
+  40: Exit world
+  43: Exit
+  45: Air vent
+  46: Horizontal laser
+  47: Vertical laser
+  48: Level start dialog
+  49: Teleport
+  4f: Hazard door
+  50: Keyed door
+  59: Partial horizontal laser
+  5f: Elevator
+  77: Green eye alien
+  79: Megaman enemy
+  7d: Horizontal moving platform
+  81: Mincer
+  86: Trampoline
+  c2: Bullseye target
+
+Cave World (Chunk 450)
+----------------------
+
+  09: Drawbridge (key activated)
+  27: Mouth flame shooter
+  29: Flame ball
+  2e: Female viking
+  2c: Falling rocks (makes a platform)
+  60: Dinosaur
+  62: Caveman
+  63: Snail
+
+Egypt World (Chunk 451)
+-----------------------
+
+  0a: Falling small block region
+  11: Crumbling floor (switch activated)
+  34: Coconut
+  37: Platform holders (switch activated)
+  5d: Boulder
+  67: Scorpion
+  68: Mummy
+  6b: Falling big block region (can be stood on)
+  69: Pharoh
+  6d: Platform (supported by holders, switch activated)
+  70: Circular moving platform
+  72: Pushable block
+
+Factory World (Chunk 452)
+-------------------------
+
+  87: Blade spinning robot
+  88: Cannon robot
+  92: Crane
+  96: Big hydraulic press
+  97: Small hydraulic press
+  a2: Extending platform
+
+Candy World (Chunk 453)
+-----------------------
+
+  86: Trampoline
+  8d: Conveyer belt
+  95: Pump
+  9e: Gas pipe
+  9f: Gas flame shooter

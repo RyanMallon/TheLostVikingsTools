@@ -26,39 +26,6 @@
 # and the -c argument to annotate each dissassembled sequence with a comment
 # showing the original opcode and operands.
 #
-# Some of the programs from the space world objects (chunk 449) are:
-#
-#   04: Gun turret
-#   05: Turret bullet
-#   07: Baleog arrow
-#   08: Fire arrow
-#   0b: Dialog box (text="password")
-#   0c: Bullet explosion
-#   1d: Collectible
-#   1a: Key slot
-#   1e: Big collectible (steak)
-#   17: Button (triggers lazer)
-#   1f: Button
-#   20: Question box
-#   3c: Janitor alien
-#   3f: Level exit dialog
-#   40: Exit world
-#   43: Exit
-#   45: Air vent
-#   46: Horizontal lazer
-#   47: Vertical lazer
-#   48: Level start dialog
-#   49: Teleport
-#   4f: Hazard door
-#   50: Keyed door
-#   59: Partial horizontal lazer
-#   5f: Elevator
-#   77: Green eye alien
-#   7d: Horizontal moving platform
-#   79: Megaman enemy
-#   81: Mincer
-#   86: Trampoline
-#   c2: Bullseye target
 #
 
 import argparse
