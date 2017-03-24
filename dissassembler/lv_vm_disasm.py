@@ -215,20 +215,20 @@ class Disassembler(object):
             # Nearest viking returned by VM function 34
             0x03ca: "func_34_viking",
 
-            0x03e4: "olaf_inv_slot[0]",
-            0x03e6: "olaf_inv_slot[1]",
-            0x03e8: "olaf_inv_slot[2]",
-            0x03ea: "olaf_inv_slot[3]",
+            0x03e4: "erik_inv_slot[0]",
+            0x03e6: "erik_inv_slot[1]",
+            0x03e8: "erik_inv_slot[2]",
+            0x03ea: "erik_inv_slot[3]",
 
-            0x03ec: "erik_inv_slot[0]",
-            0x03ee: "erik_inv_slot[1]",
-            0x03f0: "erik_inv_slot[2]",
-            0x03f2: "erik_inv_slot[3]",
+            0x03ec: "baleog_inv_slot[0]",
+            0x03ee: "baleog_inv_slot[1]",
+            0x03f0: "baleog_inv_slot[2]",
+            0x03f2: "baleog_inv_slot[3]",
 
-            0x03f4: "baleog_inv_slot[0]",
-            0x03f6: "baleog_inv_slot[1]",
-            0x03f8: "baleog_inv_slot[2]",
-            0x03fa: "baleog_inv_slot[3]",
+            0x03f4: "olaf_inv_slot[0]",
+            0x03f6: "olaf_inv_slot[1]",
+            0x03f8: "olaf_inv_slot[2]",
+            0x03fa: "olaf_inv_slot[3]",
 
             # 0x0418: "current_viking", ?
             }
