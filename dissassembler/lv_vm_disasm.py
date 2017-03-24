@@ -547,7 +547,7 @@ class Disassembler(object):
             self.disasm_operand_get(instr, operands[0] & 0x7, "tmp_c")
             self.disasm_operand_get(instr, (operands[0] >> 3) & 0x7, "tmp_d")
 
-            instr.emit("vm_func_41();")
+            instr.emit("vm_func_41(tmp_a, tmp_b, tmp_c, tmp_d);")
 
         elif opcode == 0x42:
             instr.emit("vm_func_42();")
