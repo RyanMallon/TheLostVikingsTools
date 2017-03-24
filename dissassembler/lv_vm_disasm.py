@@ -438,7 +438,13 @@ class Disassembler(object):
             operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
             # FIMXE - logic correct?
-            instr.emit("if (sub_158d7(0x{:02x}))".format(operands[0]))
+            instr.emit("if (vm_func_24(0x{:02x}))".format(operands[0]))
+            instr.emit_jump(operands[1], indent=1)
+
+        elif opcode == 0x25:
+            operands[0] = instr.get_byte()
+            operands[1] = instr.get_word()
+            instr.emit("if (vm_func_25(0x{:02x}))".format(operands[0]))
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0x26:
