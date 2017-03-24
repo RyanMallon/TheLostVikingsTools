@@ -1013,8 +1013,6 @@ class Disassembler(object):
             0x10, # Object update (returns)
             ]
 
-        print("Parsing function '{}' at {:04x}".format(func_name, addr))
-
         func = Function(func_name, addr)
 
         refed_labels = set()
