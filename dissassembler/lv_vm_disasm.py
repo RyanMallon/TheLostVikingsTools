@@ -191,11 +191,10 @@ class Disassembler(object):
         names = {
             0x08: "flags",
             0x0a: "argument",
-            0x1c: "update_time",
             0x1a: "object_type",
             0x1e: "xoff",
             0x20: "yoff",
-            0x26: "blocks_movement",
+            0x3c: "target_obj",
             }
         if offset in names:
             return "{}".format(names[offset])
