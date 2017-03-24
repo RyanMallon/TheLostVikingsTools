@@ -314,7 +314,7 @@ class Disassembler(object):
         opcode = instr.opcode
 
         if opcode == 0x00:
-            instr.emit("this.save_state();")
+            instr.emit("this.yield();")
 
         elif opcode == 0x01:
             instr.emit("nop();")
@@ -340,25 +340,25 @@ class Disassembler(object):
 
         elif opcode == 0x07:
             instr.emit("if (!({} & 0x0040))".format(self.obj_field_name(Disassembler.FIELD_FLAGS)))
-            instr.emit("this.move_horiz();", indent=1)
+            instr.emit("this.flip_horiz();", indent=1)
 
         elif opcode == 0x08:
             instr.emit("if ({} & 0x0040)", self.obj_field_name(Disassembler.FIELD_FLAGS))
-            instr.emit("this.move_horiz();", indent=1)
+            instr.emit("this.flip_horiz();", indent=1)
 
         elif opcode == 0x09:
             instr.emit("if (!({} & 0x0080))", self.obj_field_name(Disassembler.FIELD_FLAGS))
-            instr.emit("this.move_vert();", indent=1)
+            instr.emit("this.flip_vert();", indent=1)
 
         elif opcode == 0x0a:
             instr.emit("if ({} & 0x0080)", self.obj_field_name(Disassembler.FIELD_FLAGS))
-            instr.emit("this.move_vert();", indent=1)
+            instr.emit("this.flip_vert();", indent=1)
 
         elif opcode == 0x0b:
-            instr.emit("this.move_horiz();")
+            instr.emit("this.flip_horiz();")
 
         elif opcode == 0x0c:
-            instr.emit("this.move_vert();")
+            instr.emit("this.flip_vert();")
 
         elif opcode == 0x0e:
             # FIXME
@@ -431,7 +431,7 @@ class Disassembler(object):
         elif opcode == 0x1d:
             operands[0] = instr.get_word()
             operands[1] = instr.get_word()
-            instr.emit("if (vm_function_1d(0x{:04x}))".format(operands[0]))
+            instr.emit("if (vm_func_1d(0x{:04x}))".format(operands[0]))
             instr.emit_call(operands[1], indent=1)
 
         elif opcode == 0x23:
