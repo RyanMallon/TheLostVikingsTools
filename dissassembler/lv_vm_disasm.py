@@ -732,9 +732,9 @@ class Disassembler(object):
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0x75:
-            operands[0] = instr.get_word()
+            operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
-            instr.emit("if ([[[VAR]]] != 0x%.4x)".format(operands[0]))
+            instr.emit("if ([[[VAR]]] != {})".format(self.obj_field_name2(operands[0])))
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0x77:
@@ -846,7 +846,7 @@ class Disassembler(object):
             instr.emit("{} += [[[VAR]]];".format(self.ds_name(operands[0])), indent=1)
 
         elif opcode == 0x96:
-            instr.emit("{} = [[[VAR]]];".format(self.obj_field_name(0x1e)))
+            instr.emit("{} = [[[VAR]]];".format(self.obj_field_name(0x3c)))
 
         elif opcode == 0x97:
             operands[0] = instr.get_byte()
