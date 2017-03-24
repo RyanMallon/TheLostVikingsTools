@@ -454,6 +454,16 @@ class Disassembler(object):
             self.disasm_operand_get(instr, operands[1] & 0x7, "tmp_c")
             self.disasm_operand_get(instr, (operands[1] >> 3) & 0x7, "tmp_d")
 
+        elif opcode == 0x2a:
+            operands[0] = instr.get_byte()
+            self.disasm_operand_get(instr, operands[0] & 0x7, "tmp_a")
+            self.disasm_operand_get(instr, (operands[0] >> 3) & 0x7, "tmp_b")
+
+            operands[1] = instr.get_byte()
+            self.disasm_operand_get(instr, operands[1] & 0x7, "tmp_c")
+
+            instr.emit("vm_func_2a(tmp_a, tmp_b, tmp_c);")
+
         elif opcode == 0x2b:
             operands[0] = instr.get_byte()
             self.disasm_operand_get(instr, operands[0] & 0x7, "tmp_a")
@@ -579,6 +589,11 @@ class Disassembler(object):
             instr.emit("if (vm_func_4e())")
             instr.emit_jump(operands[0], indent=1)
 
+        elif opcode == 0x4f:
+            operands[0] = instr.get_word()
+            instr.emit("if (vm_func_4f())")
+            instr.emit_jump(operands[0], indent=1)
+
         #
         # Opcodes 51..55: var = <x>;
         #
@@ -616,6 +631,10 @@ class Disassembler(object):
         #
         # Opcodes 59..5b: <x> += var;
         #
+        elif opcode == 0x59:
+            operands[0] = instr.get_byte()
+            instr.emit("{} += [[[VAR]]];".format(self.obj_field_name(operands[0])))
+
         elif opcode == 0x5a:
             operands[0] = instr.get_word()
             instr.emit("{} += [[[VAR]]];".format(self.ds_name(operands[0])))
@@ -682,6 +701,18 @@ class Disassembler(object):
             instr.emit("if ([[[VAR]]] < 0x%.4x)".format(operands[0]))
             instr.emit_jump(operands[1], indent=1)
 
+        elif opcode == 0x6e:
+            operands[0] = instr.get_byte()
+            operands[1] = instr.get_word()
+            instr.emit("if ([[[VAR]]] < {})".format(self.obj_field_name(operands[0])))
+            instr.emit_jump(operands[1], indent=1)
+
+        elif opcode == 0x70:
+            operands[0] = instr.get_byte()
+            operands[1] = instr.get_word()
+            instr.emit("if ([[[VAR]]] < {})".format(self.obj_field_name2(operands[0])))
+            instr.emit_jump(operands[1], indent=1)
+
         elif opcode == 0x72:
             operands[0] = instr.get_word()
             operands[1] = instr.get_word()
@@ -724,12 +755,27 @@ class Disassembler(object):
             instr.emit("if ({} != [[[VAR]]])".format(self.ds_name(operands[0])))
             instr.emit_jump(operands[1], indent=1)
 
+        elif opcode == 0x7a:
+            operands[0] = instr.get_byte()
+            operands[1] = instr.get_word()
+
+            instr.emit("if (abs({} - [[[VAR]]]) >= 0)".format(self.obj_field_name2(operands[0])))
+            instr.emit_jump(operands[1], indent=1)
+
+
         elif opcode == 0x7c:
             operands[0] = instr.get_word()
             operands[1] = instr.get_word()
 
             # FIXME - logic correct?
             instr.emit("if (abs(0x{:04x} - [[[VAR]]]) >= 0)".format(operands[0]))
+            instr.emit_jump(operands[1], indent=1)
+
+        elif opcode == 0x7d:
+            operands[0] = instr.get_byte()
+            operands[1] = instr.get_word()
+
+            instr.emit("if (abs({} - [[[VAR]]]) >= 0)".format(self.obj_field_name(operands[0])))
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0x7e:
@@ -764,6 +810,12 @@ class Disassembler(object):
             # FIXME - logic?
             instr.emit("if ([[[VAR]]] - {})".format(self.obj_field_name2(operands[0])))
             instr.emit_jump(operands[1], indent=1)
+
+        elif opcode == 0x87:
+            operands[0] = instr.get_byte()
+            operands[1] = instr.get_word()
+            instr.emit("if ([[[VAR]]] == {})".format(self.obj_field_name(operands[0])))
+            instr.emit_call(operands[1], indent=1)
 
         elif opcode == 0x8b:
             operands[0] = instr.get_word()
@@ -929,6 +981,14 @@ class Disassembler(object):
         elif opcode == 0xcf:
             operands[0] = instr.get_word()
             instr.emit_jump(operands[0])
+
+        elif opcode == 0xd1:
+            # Shares code with vm_func_2c
+            operands[0] = instr.get_byte()
+            operands[1] = instr.get_word()
+            operands[2] = instr.get_byte()
+            instr.emit("if (vm_func_d1(0x{:02x}))".format(operands[0]))
+            instr.emit_call(operands[1], indent=1)
 
         else:
             print("Unknown opcode {:02x} at {:04x}".format(opcode, instr.addr))
