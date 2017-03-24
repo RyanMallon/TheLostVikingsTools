@@ -582,7 +582,7 @@ class Disassembler(object):
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0x4b:
-            instr.emit("{} |= 0x2000;".format(self.obj_field_name(0x04)))
+            instr.emit("{} |= 0x2000;".format(self.obj_field_name(Disassembler.FIELD_FLAGS)))
 
         elif opcode == 0x4e:
             operands[0] = instr.get_word()
@@ -840,7 +840,7 @@ class Disassembler(object):
             operands[0] = instr.get_word()
 
             # FIXME - logic order?
-            instr.emit("if ({} & 0x0040)".format(self.obj_field_name(0x04)))
+            instr.emit("if ({} & 0x0040)".format(self.obj_field_name(Disassembler.FIELD_FLAGS)))
             instr.emit("{} -= [[[VAR]]]".format(self.ds_name(operands[0])), indent=1)
             instr.emit("else")
             instr.emit("{} += [[[VAR]]];".format(self.ds_name(operands[0])), indent=1)
