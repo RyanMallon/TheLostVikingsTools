@@ -268,7 +268,7 @@ class Disassembler(object):
 
         elif kind == 0x02:
             operand = instr.get_word()
-            instr.emit("{} = {}];".format(var_name, self.ds_name(operand)))
+            instr.emit("{} = {};".format(var_name, self.ds_name(operand)))
 
         elif kind == 0x03:
             operand = instr.get_byte()
