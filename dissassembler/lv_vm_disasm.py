@@ -179,6 +179,8 @@ class Function(object):
         print("")
 
 class Disassembler(object):
+    FIELD_FLAGS = 0x08
+
     def __init__(self, code):
         self.code = code
         self.funcs = []
@@ -187,8 +189,7 @@ class Disassembler(object):
 
     def __obj_field_name(self, offset):
         names = {
-            0x04: "flags",
-            0x08: "db_flags",
+            0x08: "flags",
             0x0a: "argument",
             0x1c: "update_time",
             0x1a: "object_type",
@@ -339,19 +340,19 @@ class Disassembler(object):
             instr.emit("return;")
 
         elif opcode == 0x07:
-            instr.emit("if (!({} & 0x0040))".format(self.obj_field_name(0x04)))
+            instr.emit("if (!({} & 0x0040))".format(self.obj_field_name(Disassembler.FIELD_FLAGS)))
             instr.emit("this.move_horiz();", indent=1)
 
         elif opcode == 0x08:
-            instr.emit("if ({} & 0x0040)", self.obj_field_name(0x04))
+            instr.emit("if ({} & 0x0040)", self.obj_field_name(Disassembler.FIELD_FLAGS))
             instr.emit("this.move_horiz();", indent=1)
 
         elif opcode == 0x09:
-            instr.emit("if (!({} & 0x0080))", self.obj_field_name(0x04))
+            instr.emit("if (!({} & 0x0080))", self.obj_field_name(Disassembler.FIELD_FLAGS))
             instr.emit("this.move_vert();", indent=1)
 
         elif opcode == 0x0a:
-            instr.emit("if ({} & 0x0080)", self.obj_field_name(0x04))
+            instr.emit("if ({} & 0x0080)", self.obj_field_name(Disassembler.FIELD_FLAGS))
             instr.emit("this.move_vert();", indent=1)
 
         elif opcode == 0x0b:
@@ -414,7 +415,7 @@ class Disassembler(object):
             operands[1] = instr.get_word()
 
             # FIXME
-            instr.emit("if (vm_func_21({} & 0x0040))".format(self.obj_field_name(0x04), operands[0]))
+            instr.emit("if (vm_func_21({} & 0x0040))".format(self.obj_field_name(Disassembler.FIELD_FLAGS), operands[0]))
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0x1a:
@@ -779,7 +780,7 @@ class Disassembler(object):
 
         elif opcode == 0x91:
             operands[0] = instr.get_word()
-            instr.emit("if ({} & 0x0040)".format(self.obj_field_name(0x04)))
+            instr.emit("if ({} & 0x0040)".format(self.obj_field_name(Disassembler.FIELD_FLAGS)))
             instr.emit("{} -= [[[VAR]]];".format(self.ds_name(operands[0])), indent=1)
             instr.emit("else")
             instr.emit("{} += [[[VAR]]];".format(self.ds_name(operands[0])), indent=1)
@@ -899,7 +900,7 @@ class Disassembler(object):
             operands[1] = instr.get_word()
 
             # FIXME
-            instr.emit("if (vm_func_c2({} & 0x0040, 0x{:02x}))".format(self.obj_field_name(0x04), operands[0]))
+            instr.emit("if (vm_func_c2({} & 0x0040, 0x{:02x}))".format(self.obj_field_name(Disassembler.FIELD_FLAGS), operands[0]))
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0xc7:
