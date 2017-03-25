@@ -346,15 +346,15 @@ class Disassembler(object):
             instr.emit("this.flip_horiz();", indent=1)
 
         elif opcode == 0x08:
-            instr.emit("if ({} & 0x0040)", self.obj_field_name(Disassembler.FIELD_FLAGS))
+            instr.emit("if ({} & 0x0040)".format(self.obj_field_name(Disassembler.FIELD_FLAGS)))
             instr.emit("this.flip_horiz();", indent=1)
 
         elif opcode == 0x09:
-            instr.emit("if (!({} & 0x0080))", self.obj_field_name(Disassembler.FIELD_FLAGS))
+            instr.emit("if (!({} & 0x0080))".format(self.obj_field_name(Disassembler.FIELD_FLAGS)))
             instr.emit("this.flip_vert();", indent=1)
 
         elif opcode == 0x0a:
-            instr.emit("if ({} & 0x0080)", self.obj_field_name(Disassembler.FIELD_FLAGS))
+            instr.emit("if ({} & 0x0080)".format(self.obj_field_name(Disassembler.FIELD_FLAGS)))
             instr.emit("this.flip_vert();", indent=1)
 
         elif opcode == 0x0b:
