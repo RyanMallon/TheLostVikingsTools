@@ -201,6 +201,9 @@ class Disassembler(object):
         else:
             return "field_{:02x}".format(offset)
 
+    def bitfield_value(self, bit):
+        return "0x{:04x}".format(1 << (bit / 2))
+
     def obj_field_name(self, offset):
         return "this.{}".format(self.__obj_field_name(offset))
 
@@ -857,18 +860,18 @@ class Disassembler(object):
         elif opcode == 0x97:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_byte()
-            instr.emit("if (0x{:04x} & (1 << {}))".format(operands[1], operands[0] / 2))
+            instr.emit("if (0x{:04x} & {})".format(operands[1], self.bitfield_value(operands[0])))
             instr.emit("var = 0x0001;", indent=1)
 
         elif opcode == 0x98:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_byte()
-            instr.emit("var = <<<!!({} & (1 << {}))>>>;".format(self.obj_field_name(operands[1]), operands[0] / 2))
+            instr.emit("var = <<<!!({} & {})>>>;".format(self.obj_field_name(operands[1]), self.bitfield_value(operands[0])))
 
         elif opcode == 0x99:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
-            instr.emit("if ({} & (1 << {}))".format(self.ds_name(operands[1]), operands[0] / 2))
+            instr.emit("if ({} & {})".format(self.ds_name(operands[1]), self.bitfield_value(operands[0])))
             instr.emit("var = 1;", indent=1)
 
         elif opcode == 0x9a:
@@ -883,7 +886,7 @@ class Disassembler(object):
             operands[0] = instr.get_byte()
             operands[1] = instr.get_byte()
             instr.emit("if (!([[[VAR]]]))")
-            instr.emit("{} &= ~(1 << {});".format(self.obj_field_name(operands[1]), operands[0] / 2), indent=1)
+            instr.emit("{} &= ~{};".format(self.obj_field_name(operands[1]), self.bitfield_value(operands[0])), indent=1)
 
         elif opcode == 0x9d:
             operands[0] = instr.get_byte()
@@ -891,8 +894,8 @@ class Disassembler(object):
 
             # FIXME
             instr.emit("if ([[[VAR]]] != 0)")
-            instr.emit("var = (1 << {})".format(operands[0] / 2), indent=1)
-            instr.emit("{} &= ~(1 << {});".format(self.ds_name(operands[1]), operands[0] / 2))
+            instr.emit("var = {}".format(self.bitfield_value(operands[0])), indent=1)
+            instr.emit("{} &= ~{};".format(self.ds_name(operands[1]), self.bitfield_value(operands[0])))
             instr.emit("{} |= var;".format(self.ds_name(operands[1])))
 
         elif opcode == 0x9e:
@@ -900,10 +903,10 @@ class Disassembler(object):
             operands[1] = instr.get_byte()
 
             instr.emit("if ([[[VAR]]] != 0)")
-            instr.emit("var = (1 << {});".format(operands[0] / 2), indent=1)
+            instr.emit("var = {};".format(self.bitfield_value(operands[0])), indent=1)
 
             # dx = mask[0]
-            instr.emit("{} &= ~(1 << {});".format(self.obj_field_name2(operands[1]), operands[0] / 2))
+            instr.emit("{} &= ~{};".format(self.obj_field_name2(operands[1]), self.bitfield_value(operands[0])))
             instr.emit("{} |= var;".format(self.obj_field_name2(operands[1])))
 
         elif opcode == 0xa8:
@@ -911,7 +914,7 @@ class Disassembler(object):
             operands[1] = instr.get_word()
             operands[2] = instr.get_word()
             # FIXME - logic?
-            instr.emit("if (0x{:04x} & (1 << {}))".format(operands[1], operands[0] / 2))
+            instr.emit("if (0x{:04x} & {})".format(operands[1], self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xa9:
@@ -919,35 +922,35 @@ class Disassembler(object):
             operands[1] = instr.get_byte()
             operands[2] = instr.get_word()
 
-            instr.emit("if ({} & (1 << {}))".format(self.obj_field_name(operands[1]), operands[0] / 2))
+            instr.emit("if ({} & {})".format(self.obj_field_name(operands[1]), self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xaa:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
             operands[2] = instr.get_word()
-            instr.emit("if (0x{:04x} & (1 << {}))".format(operands[1], operands[0] / 2))
+            instr.emit("if (0x{:04x} & {})".format(operands[1], self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xab:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_byte()
             operands[2] = instr.get_word()
-            instr.emit("if ({} & (1 << {}))".format(self.obj_field_name2(operands[1]), operands[0] / 2))
+            instr.emit("if ({} & {})".format(self.obj_field_name2(operands[1]), self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xae:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_byte()
             operands[2] = instr.get_word()
-            instr.emit("if ({} & (1 << {}))".format(self.obj_field_name(operands[1]), operands[0] / 2))
+            instr.emit("if ({} & {})".format(self.obj_field_name(operands[1]), self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xaf:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
             operands[2] = instr.get_word()
-            instr.emit("if (var == {} & (1 << {}))".format(self.ds_name(operands[1]), operands[0] / 2))
+            instr.emit("if (var == {} & {})".format(self.ds_name(operands[1]), self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xb0:
@@ -956,7 +959,7 @@ class Disassembler(object):
             operands[2] = instr.get_word()
 
             # FIXME - check logic order
-            instr.emit("if ({} & (1 << {}))".format(self.obj_field_name2(operands[1]), operands[0] / 2))
+            instr.emit("if ({} & {})".format(self.obj_field_name2(operands[1]), self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xc2:
