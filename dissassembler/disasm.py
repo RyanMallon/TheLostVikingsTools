@@ -19,7 +19,7 @@
 # Then run this dissassembler with the index of the program you want to
 # dissassemble:
 #
-#   python ./lv_vm_disasm.py progs.bin 0x4
+#   python ./disasm.py progs.bin 0x4
 #
 # If the program fails to dissassemble (probably because of an unimplemented
 # opcode) then pass the -d argument to dump instructions as they are parsed
