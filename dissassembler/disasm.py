@@ -922,6 +922,13 @@ class Disassembler(object):
             instr.emit("if ({} & (1 << {}))".format(self.obj_field_name(operands[1]), operands[0] / 2))
             instr.emit_jump(operands[2], indent=1)
 
+        elif opcode == 0xaa:
+            operands[0] = instr.get_byte()
+            operands[1] = instr.get_word()
+            operands[2] = instr.get_word()
+            instr.emit("if (0x{:04x} & (1 << {}))".format(operands[1], operands[0] / 2))
+            instr.emit_jump(operands[2], indent=1)
+
         elif opcode == 0xab:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_byte()
