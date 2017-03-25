@@ -587,7 +587,19 @@ class Disassembler(object):
             operands[1] = instr.get_byte()
             operands[2] = instr.get_word()
 
-            instr.emit("if (vm_func_49(0x{:02x}))".format(operands[1]))
+            instr.emit("if (vm_func_49(tmp_a, tmp_b, 0x{:02x}))".format(operands[1]))
+            instr.emit_jump(operands[2], indent=1)
+
+        elif opcode == 0x4a:
+            # Shares code with opcode 0x49
+            operands[0] = instr.get_byte()
+            self.disasm_operand_get(instr, operands[0] & 0x7, "tmp_a")
+            self.disasm_operand_get(instr, (operands[0] >> 3) & 0x7, "tmp_b")
+
+            operands[1] = instr.get_byte()
+            operands[2] = instr.get_word()
+
+            instr.emit("if (vm_func_4a(tmp_a, tmp_b, 0x{:02x}))".format(operands[1]))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0x4b:
