@@ -207,8 +207,8 @@ class Disassembler(object):
     def obj_field_name(self, offset):
         return "this.{}".format(self.__obj_field_name(offset))
 
-    def obj_field_name2(self, offset):
-        return "this.target.{}".format(self.__obj_field_name(offset))
+    def obj_target_field_name(self, offset):
+        return "target.{}".format(self.__obj_field_name(offset))
 
     def ds_name(self, offset):
         names = {
@@ -255,7 +255,7 @@ class Disassembler(object):
 
         elif kind == 0x03:
             operand = instr.get_byte()
-            instr.emit("{} = {};".format(self.obj_field_name2(operand), var_name))
+            instr.emit("{} = {};".format(self.obj_target_field_name(operand), var_name))
 
         else:
             instr.emit("BAD = {};".formar(var_name))
@@ -275,7 +275,7 @@ class Disassembler(object):
 
         elif kind == 0x03:
             operand = instr.get_byte()
-            instr.emit("{} = {};".format(var_name, self.obj_field_name2(operand)))
+            instr.emit("{} = {};".format(var_name, self.obj_target_field_name(operand)))
 
         elif kind == 0x04:
             instr.emit("{} = UNKNOWN;".format(var_name))
@@ -632,7 +632,7 @@ class Disassembler(object):
 
         elif opcode == 0x54:
             operands[0] = instr.get_byte()
-            instr.emit("var = <<<{}>>>;".format(self.obj_field_name2(operands[0])))
+            instr.emit("var = <<<{}>>>;".format(self.obj_target_field_name(operands[0])))
 
         #
         # Opcodes 56..58: <x> = var;
@@ -647,7 +647,7 @@ class Disassembler(object):
 
         elif opcode == 0x58:
             operands[0] = instr.get_byte()
-            instr.emit("{} = [[[VAR]]];".format(self.obj_field_name2(operands[0])))
+            instr.emit("{} = [[[VAR]]];".format(self.obj_target_field_name(operands[0])))
 
         #
         # Opcodes 59..5b: <x> += var;
@@ -662,7 +662,7 @@ class Disassembler(object):
 
         elif opcode == 0x5b:
             operands[0] = instr.get_byte()
-            instr.emit("{} += [[[VAR]]];".format(self.obj_field_name2(operands[0])))
+            instr.emit("{} += [[[VAR]]];".format(self.obj_target_field_name(operands[0])))
 
         #
         # Opcodes 5c..5e: <x> -= var;
@@ -677,7 +677,7 @@ class Disassembler(object):
 
         elif opcode == 0x5e:
             operands[0] = instr.get_byte()
-            instr.emit("{} -= [[[VAR]]];".format(self.obj_field_name2(operands[0])))
+            instr.emit("{} -= [[[VAR]]];".format(self.obj_target_field_name(operands[0])))
 
         #
         # Opcodes 5f..61: <x> &= var;
@@ -731,7 +731,7 @@ class Disassembler(object):
         elif opcode == 0x70:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
-            instr.emit("if ([[[VAR]]] < {})".format(self.obj_field_name2(operands[0])))
+            instr.emit("if ([[[VAR]]] < {})".format(self.obj_target_field_name(operands[0])))
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0x72:
@@ -755,7 +755,7 @@ class Disassembler(object):
         elif opcode == 0x75:
             operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
-            instr.emit("if ([[[VAR]]] != {})".format(self.obj_field_name2(operands[0])))
+            instr.emit("if ([[[VAR]]] != {})".format(self.obj_target_field_name(operands[0])))
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0x77:
@@ -780,7 +780,7 @@ class Disassembler(object):
             operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
 
-            instr.emit("if (abs({} - [[[VAR]]]) >= 0)".format(self.obj_field_name2(operands[0])))
+            instr.emit("if (abs({} - [[[VAR]]]) >= 0)".format(self.obj_target_field_name(operands[0])))
             instr.emit_jump(operands[1], indent=1)
 
 
@@ -829,7 +829,7 @@ class Disassembler(object):
             operands[0] = instr.get_byte()
             operands[1] = instr.get_word()
             # FIXME - logic?
-            instr.emit("if ([[[VAR]]] - {})".format(self.obj_field_name2(operands[0])))
+            instr.emit("if ([[[VAR]]] - {})".format(self.obj_target_field_name(operands[0])))
             instr.emit_jump(operands[1], indent=1)
 
         elif opcode == 0x87:
@@ -918,8 +918,8 @@ class Disassembler(object):
             instr.emit("var = {};".format(self.bitfield_value(operands[0])), indent=1)
 
             # dx = mask[0]
-            instr.emit("{} &= ~{};".format(self.obj_field_name2(operands[1]), self.bitfield_value(operands[0])))
-            instr.emit("{} |= var;".format(self.obj_field_name2(operands[1])))
+            instr.emit("{} &= ~{};".format(self.obj_target_field_name(operands[1]), self.bitfield_value(operands[0])))
+            instr.emit("{} |= var;".format(self.obj_target_field_name(operands[1])))
 
         elif opcode == 0xa8:
             operands[0] = instr.get_byte()
@@ -948,7 +948,7 @@ class Disassembler(object):
             operands[0] = instr.get_byte()
             operands[1] = instr.get_byte()
             operands[2] = instr.get_word()
-            instr.emit("if ({} & {})".format(self.obj_field_name2(operands[1]), self.bitfield_value(operands[0])))
+            instr.emit("if ({} & {})".format(self.obj_target_field_name(operands[1]), self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xae:
@@ -971,7 +971,7 @@ class Disassembler(object):
             operands[2] = instr.get_word()
 
             # FIXME - check logic order
-            instr.emit("if ({} & {})".format(self.obj_field_name2(operands[1]), self.bitfield_value(operands[0])))
+            instr.emit("if ({} & {})".format(self.obj_target_field_name(operands[1]), self.bitfield_value(operands[0])))
             instr.emit_jump(operands[2], indent=1)
 
         elif opcode == 0xc2:
