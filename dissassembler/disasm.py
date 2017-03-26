@@ -1,5 +1,18 @@
-#
+# =============================================================================
 # The Lost Vikings Virtual Machine Dissassembler
+#
+# Ryan Mallon, 2017, <rmallon@gmail.com>
+#
+# This file is part of The Lost Vikings Library/Tools
+#
+# To the extent possible under law, the author(s) have dedicated all
+# copyright and related and neighboring rights to this software to
+# the public domain worldwide. This software is distributed without
+# any warranty.  You should have received a copy of the CC0 Public
+# Domain Dedication along with this software. If not, see
+#
+# <http://creativecommons.org/publicdomain/zero/1.0/>.
+# =============================================================================
 #
 # This is a very basic, work in progress dissassembler for the virtual machine
 # which controls object behaviour in The Lost Vikings.
@@ -25,7 +38,6 @@
 # opcode) then pass the -d argument to dump instructions as they are parsed
 # and the -c argument to annotate each dissassembled sequence with a comment
 # showing the original opcode and operands.
-#
 #
 
 import argparse
