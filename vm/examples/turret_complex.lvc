@@ -1,0 +1,85 @@
+//
+// Turret which does different things when the vikings touch it
+// Replaces object 0x04 in chunk 449
+//
+
+#include "vikings.h"
+
+// Field names
+#define obj_to_give field_16
+#define timer       field_30
+#define updated     field_32
+
+function main
+{
+    call set_gfx_prog(0x37bc);
+
+    this.obj_to_give = 1;
+    this.timer = 0;
+    this.updated = 0;
+
+    while (this.timer != 0xffff) {
+        call update_obj();
+        call yield();
+
+        if (this.timer != 0) {
+            this.timer = this.timer - 1;
+
+        } elif (call collided_with_viking(0x01)) {
+            if (target.obj_type == VIKING_OLAF) {
+                //
+                // If Olaf touches the turret bounce him up in the air.
+                //
+                target.reaction = VIKING_REACT_BOUNCE;
+                target.y_velocity = target.y_velocity - 4000;
+                this.updated = 1;
+
+            } elif (target.obj_type == VIKING_BALEOG) {
+                //
+                // If Baleog touches the turret flip it around
+                //
+                call flip_horiz();
+                this.updated = 1;
+
+            } elif (target.obj_type == VIKING_ERIK) {
+                //
+                // If Erik touches the turret give him a collectible
+                //
+                if (erik_inv_slot[0] == 0) {
+                    erik_inv_slot[0] = this.obj_to_give;
+                    this.updated = 1;
+                } elif (erik_inv_slot[1] == 0) {
+                    erik_inv_slot[1] = this.obj_to_give;
+                    this.updated = 1;
+                } elif (erik_inv_slot[2] == 0) {
+                    erik_inv_slot[2] = this.obj_to_give;
+                    this.updated = 1;
+                } elif (erik_inv_slot[3] == 0) {
+                    erik_inv_slot[3] = this.obj_to_give;
+                    this.updated = 1;
+                }
+
+                if (this.updated == 1) {
+                    //
+                    // Set the next collectible to give Olaf
+                    //
+                    this.obj_to_give = this.obj_to_give + 1;
+                    if (this.obj_to_give == 0x13) {
+                        this.obj_to_give = 1;
+                    }
+                }
+            }
+
+            if (this.updated == 1) {
+                //
+                // If the turret updated change the animation and start a
+                // countdown timer to delay the next timer the turret will
+                // react to being touched.
+                //
+                call set_gfx_prog(0x37c8);
+                this.timer = 50;
+                this.updated = 0;
+            }
+        }
+    }
+}

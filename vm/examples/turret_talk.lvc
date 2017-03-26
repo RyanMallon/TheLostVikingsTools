@@ -1,0 +1,29 @@
+//
+// Talking turret, shows dialog boxes when touched
+// Replaces object 0x04 in chunk 449
+//
+function main
+{
+    call set_gfx_prog(0x37bc);
+
+    this.field_30 = 0;
+    while (this.field_30 != 0xffff) {
+	call update_obj();
+        call yield();
+
+        if (call collided_with_viking(0x01)) {
+            if (this.field_30 == 0) {
+                // Only talk once
+                this.field_30 = 1;
+
+                call show_dialog(100, 0, 32, 0);
+                call wait_key();
+                call clear_dialog();
+
+                call show_dialog(101, 0, 0, 32);
+                call wait_key();
+                call clear_dialog();
+            }
+        }
+    }
+}

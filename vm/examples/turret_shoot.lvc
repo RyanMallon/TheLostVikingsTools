@@ -1,0 +1,41 @@
+//
+// Turret that shoots
+// Replaces object 0x04 in chunk 449
+//
+
+#define timer      field_30
+#define DELAY_TIME 40
+
+function main
+{
+    call set_gfx_prog(0x37bc);
+
+    this.timer = 0;
+    while (this.timer != 0xffff) {
+	call update_obj();
+        call yield();
+
+        if (this.timer != 0) {
+            this.timer = this.timer - 1;
+
+        } else {
+            // Calculate the offset of the projectile based on the
+            // turret's direction.
+	    if (this.flags & 0x0040) {
+                g_tmp_a = this.x - 12;
+            } else {
+                g_tmp_a = this.x + 12;
+            }
+            g_tmp_b = this.y - 12;
+
+            // Update the turret animation
+            call set_gfx_prog(0x37c8);
+
+            // Spawn an arrow projectile
+	    call spawn_obj(g_tmp_a, g_tmp_b, 0, 0, 7);
+
+            // Delay for next shot
+            this.timer = DELAY_TIME;
+        }
+    }
+}
