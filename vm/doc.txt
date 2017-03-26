@@ -1,0 +1,194 @@
+The Lost Vikings Virtual Machine
+================================
+
+Object Fields
+-------------
+
+Each object has a set of fields which can be assigned to. Some fields have
+specific meanings for all objects, while others may be used as generic local
+temporary storage for an object. The fields are indexed with word aligned
+values in the range 0x00 -- 0x3c.
+
+The following fields are known:
+
+  0x08: flags
+    This field is initialised with the value from the level header. The
+    flag values are described below.
+
+  0x0a: argument
+    Object argument field. This is initialised from the level header, allowing
+    different instances of the same object type to behave differently.
+
+  0x12: x_velocity
+    The horizontal velocity of the object. The velocity for target objects
+    should be set relative to its current value, e.g:
+
+        target.x_velocity = target.x_velocity - 0x100
+
+    Subtracting from the velocity will cause the object to move backwards.
+    Adding to the velocity will cause it to move forwards. Some objects,
+    such as the vikings, adjust their velocity on each game loop. If an object
+    modifies a viking's velocity then it needs to continually update it
+    in order to keep the viking moving.
+
+  0x14: y_velocity
+    The vertical velocity of the object. Subtracting moves the object upwards,
+    adding moves it downwards.
+
+  0x1e: x
+    The absolute x offset of the object.
+
+  0x20: y
+    The absolute y offset of the object.
+
+  0x3c: target_obj
+    The current target object. An object can modify the properties the current
+    target object by using the target fields. For example:
+
+        this.target_obj = VIKING_ERIK;
+        target.x_velocity = target.x_velocity - 0x100;
+
+    Will cause the current object to push Erik backwards (regardless of where
+    he currently is).
+
+Object Flags
+~~~~~~~~~~~~
+
+The object flags field has the following known values:
+
+  0x0040: OBJ_FLAG_FLIP_HORIZ
+    Horizontal orientation. If set the object is facing left.
+
+  0x0080: OBJ_FLAG_FLIP_VERT
+    Veritical orientation.
+
+Global Variables
+----------------
+
+The game engine defines a number of global variables, which are addressed as
+absolute indexes in the data segment (DS). Note that the virtual machine allows
+any DS address to be referenced.
+
+The following global variables are known:
+
+  0x0206: g_tmp_a
+    General purpose temporary register.
+
+  0x0208: g_tmp_b
+    General purpose temporary register.
+
+  0x03e4: erik_inv_slot[0]
+    Erik's first inventory slot. Zero indicates the slot is empty. Assigning
+    a value to this global will give Erik the corresponding object.
+
+  0x03e6: erik_inv_slot[1]
+    Erik's second inventory slot.
+
+  0x03e8: erik_inv_slot[2]
+    Erik's third inventory slot.
+
+  0x03ea: erik_inv_slot[3]
+    Erik's fourth inventory slot.
+
+  0x03ec: baleog_inv_slot[0]
+    Baleog's first inventory slot.
+
+  0x03ee: baleog_inv_slot[1]
+    Baleog's second inventory slot.
+
+  0x03f0: baleog_inv_slot[2]
+    Baleog's third inventory slot.
+
+  0x03f2: baleog_inv_slot[3]
+    Baleog's fourth inventory slot.
+
+  0x03f4: olaf_inv_slot[0]
+    Olaf's first inventory slot.
+
+  0x03f6: olaf_inv_slot[1]
+    Olaf's second inventory slot.
+
+  0x03f8: olaf_inv_slot[2]
+    Olaf's third inventory slot.
+
+  0x03fa: olaf_inv_slot[3]
+    Olaf's fourth inventory slot.
+
+Opcodes
+-------
+
+Operands
+~~~~~~~~
+
+The operands to the opcodes can be one of the following types:
+
+ * u8 :          A literal 8-bit value.
+ * u16:          A literal 16-bit value.
+ * field:        An object field index.
+ * target_field: A filed index in the current target object.
+ * ds:           A data segment index.
+
+Variable Type Arguments
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Several opcodes have one or more variable type arguments. These opcodes use
+a prefix byte to specify the types of the next two operands. The operand types
+are:
+
+ 0: 16-bit literal.
+ 1: Object field index.
+ 2: Data segment index.
+ 3: Target object field index.
+
+The prefix byte is encoded as follows:
+
+  prefix = ((arg1_type & 0x7) << 3) | (arg2_type & 07)
+
+For example, if the variable argument pair is data segment index 0x0400,
+followed by field index 0x20, the operands are encoded as:
+
+  11 0400 20
+
+Variable argument pairs are shown in the opcode list as var_pair(a, b).
+
+Function Opcodes
+----------------
+
+Some opcodes implement high-level functions. Functions with a bool return type
+may be used as the expression in an if statement. The following is a list of
+known function opcodes which are supported by the compiler:
+
+  void yield()
+    Yield execution of the current program. This returns to the game engine
+    and allows other object programs to run. This function must be called
+    from the object's main loop to avoid hanging the game.
+
+  void update_obj()
+    Update the current object. This is needed to redraw the object.
+
+  void set_gfx_prog(prog)
+    Set the current animation program offset. The animations use a separate
+    mini virtual machine which has not yet been reversed. It is safest to
+    disassemble the original program for the object and reuse the animation
+    program offsets from it.
+
+  void spawn_obj(x, y, unknown1, unknown2, obj_type)
+    Spawn a new object of the given type at the given location. This does not
+    appear to able to spawn all object types. It is most often used for
+    spawning projectiles.
+
+  void flip_horiz()
+    Flip the object horizontally.
+
+  bool collided_with_viking(unknown)
+    Returns true if the current object collides with a viking.
+
+  void show_dialog(text, unknown, x_off, y_off)
+    Show a dialog box. This should generally be followed by a wait_key() and
+    clear_dialog() to avoid graphical corruption.
+
+  void clear_dialog()
+    Clear the current dialog box.
+
+  void wait_key()
+    Wait for a keypress.
