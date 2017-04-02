@@ -157,6 +157,7 @@ static void usage(const char *progname, int status)
     printf("  -l, --level=LEVEL           Use palette data from level\n");
     printf("  -b, --palette-base=BASE     Base palette offset for packed32 sprites\n" );
     printf("  -u, --uncompressed          Chunk is uncompressed\n");
+    printf("  -s, --splash                Chunk is a splash screen image\n");
     printf("  -w, --width=WIDTH           Sprite width\n");
     printf("  -h, --height=HEIGHT         Sprite height\n");
 
@@ -191,6 +192,7 @@ int main(int argc, char **argv)
         {"level",         required_argument, 0, 'l'},
         {"palette-base",  required_argument, 0, 'b'},
         {"uncompressed",  no_argument,       0, 'u'},
+        {"splash",        no_argument,       0, 's'},
         {"width",         required_argument, 0, 'w'},
         {"height",        required_argument, 0, 'h'},
         {"screen-width",  required_argument, 0, 'W'},
@@ -198,15 +200,15 @@ int main(int argc, char **argv)
         {"help",          no_argument,       0, '?'},
         {NULL, 0, 0, 0},
     };
-    const char *short_options = "f:l:b:us:w:h:?";
+    const char *short_options = "f:l:b:usw:h:?";
     const char *pack_filename = NULL;
     SDL_Surface *screen;
     uint8_t *sprite_data;
     struct lv_pack pack;
-    struct lv_chunk *chunk;
-    bool uncompressed = false;
+    struct lv_chunk *chunk, *chunk_pal;
+    bool uncompressed = false, splash = false;
     size_t sprite_width = 32, sprite_height = 32,
-        screen_width = SCREEN_WIDTH, screen_height = SCREEN_HEIGHT;
+        screen_width = SCREEN_WIDTH, screen_height = SCREEN_HEIGHT, data_size;
     unsigned format = FORMAT_RAW, chunk_index, level_num = 0;
     int c, option_index, pal_base = 0;
 
@@ -253,6 +255,10 @@ int main(int argc, char **argv)
             uncompressed = true;
             break;
 
+        case 's':
+            splash = true;
+            break;
+
         case 'W':
             screen_width = strtoul(optarg, NULL, 0);
             break;
@@ -291,20 +297,28 @@ int main(int argc, char **argv)
     if (level_num > 0)
         load_palette_from_level(&pack, screen, level_num);
 
+    data_size = chunk->decompressed_size;
+    if (splash) {
+        /*
+         * Splash screen chunks store the data size as the number of bytes
+         * per plane, so it needs to be multiplied by 4.
+         */
+        data_size *= 4;
+    }
+
     switch (format) {
     case FORMAT_RAW:
-        draw_raw_sprites(screen, sprite_data, chunk->decompressed_size,
+        draw_raw_sprites(screen, sprite_data, data_size,
                          sprite_width, sprite_height);
         break;
 
     case FORMAT_UNPACKED:
-        draw_unpacked_sprites(screen, sprite_data, chunk->decompressed_size,
+        draw_unpacked_sprites(screen, sprite_data, data_size,
                               sprite_width, sprite_height);
         break;
 
     case FORMAT_PACKED32:
-        draw_packed32_sprites(screen, sprite_data, chunk->decompressed_size,
-                              pal_base);
+        draw_packed32_sprites(screen, sprite_data, data_size, pal_base);
         break;
     }
 
