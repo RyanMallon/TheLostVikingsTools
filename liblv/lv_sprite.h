@@ -48,14 +48,17 @@
  * \param sprite        Sprite data.
  * \param sprite_width  Sprite width.
  * \param sprite_height Sprite height.
+ * \param flip_horiz    Draw horizontally flipped.
+ * \param flip_vert     Draw vertically flipped.
  * \param dst           Destination 8-bit surface.
  * \param dst_x         X offset to draw at on the destination surface.
  * \param dst_y         Y offset to draw at on the destination surface.
  * \param dst_width     Width of the destination surface.
  */
 void lv_sprite_draw_raw(const uint8_t *sprite, size_t sprite_width,
-                        size_t sprite_height, uint8_t *dst,
-                        unsigned dst_x, unsigned dst_y, size_t dst_width);
+                        size_t sprite_height, bool flip_horiz, bool flip_vert,
+			uint8_t *dst, unsigned dst_x, unsigned dst_y,
+			size_t dst_width);
 
 /**
  * Draw a packed 32x32 planar sprite onto a linear 8-bit surface. Packed

@@ -23,8 +23,9 @@
 #define PACKED_SPRITE_HEIGHT 32
 
 void lv_sprite_draw_raw(const uint8_t *sprite, size_t sprite_width,
-			size_t sprite_height, uint8_t *dst,
-			unsigned dst_x, unsigned dst_y, size_t dst_width)
+                        size_t sprite_height, bool flip_horiz, bool flip_vert,
+                        uint8_t *dst, unsigned dst_x, unsigned dst_y,
+                        size_t dst_width)
 {
     unsigned plane, i, x, y, offset;
 
@@ -33,6 +34,11 @@ void lv_sprite_draw_raw(const uint8_t *sprite, size_t sprite_width,
             offset = (i * 4) + plane;
             y = offset / sprite_width;
             x = offset % sprite_width;
+
+            if (flip_horiz)
+                x = sprite_width - x;
+            if (flip_vert)
+                y = sprite_height - y;
 
             dst[((dst_y + y) * dst_width) + (dst_x + x)] = *sprite++;
         }

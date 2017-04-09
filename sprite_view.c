@@ -53,7 +53,7 @@ static void draw_raw_sprites(SDL_Surface *surf, const uint8_t *data,
             return;
 
         lv_sprite_draw_raw(&data[offset], sprite_width, sprite_height,
-                           surf->pixels, x, y, surf->w);
+                           false, false, surf->pixels, x, y, surf->w);
 
         x += sprite_width;
         if (x > surf->w - sprite_width) {
