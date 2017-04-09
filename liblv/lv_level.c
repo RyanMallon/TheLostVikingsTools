@@ -119,10 +119,13 @@ static int load_map(struct lv_pack *pack, struct lv_level *level,
     return 0;
 }
 
-static int load_tile_prefabs(struct lv_pack *pack, struct lv_level *level,
-                             unsigned chunk_index)
+int lv_load_tile_prefabs(struct lv_pack *pack,
+			 struct lv_tile_prefab **r_prefabs,
+			 size_t *r_num_prefabs, unsigned chunk_index)
 {
     struct lv_chunk *chunk;
+    struct lv_tile_prefab *prefabs;
+    size_t num_prefabs;
     struct buffer buf;
     uint8_t *data;
     uint16_t val;
@@ -140,10 +143,10 @@ static int load_tile_prefabs(struct lv_pack *pack, struct lv_level *level,
      *   [04] Lower left tile
      *   [08] Lower right tile
      */
-    level->num_prefabs = chunk->decompressed_size / 8;
-    level->prefabs = calloc(level->num_prefabs, sizeof(*level->prefabs));
+    num_prefabs = chunk->decompressed_size / 8;
+    prefabs = calloc(num_prefabs, sizeof(*prefabs));
 
-    for (i = 0; i < level->num_prefabs; i++) {
+    for (i = 0; i < num_prefabs; i++) {
         for (j = 0; j < 4; j++) {
             buffer_get_le16(&buf, &val);
 
@@ -151,14 +154,18 @@ static int load_tile_prefabs(struct lv_pack *pack, struct lv_level *level,
             base = (val >> 6) & 0x3;
 
             /* Upper byte is the tile index */
-            level->prefabs[i].tile[j] = base + ((val >> 8) * 4);
+            prefabs[i].tile[j] = base + ((val >> 8) * 4);
 
             /* Lower 6-bits are flags */
-            level->prefabs[i].flags[j] = val & 0x3f;
+            prefabs[i].flags[j] = val & 0x3f;
         }
     }
 
     free(data);
+
+    *r_prefabs = prefabs;
+    *r_num_prefabs = num_prefabs;
+
     return 0;
 }
 
@@ -223,7 +230,8 @@ static int load_header(struct lv_pack *pack, struct lv_level *level,
     lv_debug(LV_DEBUG_LEVEL, "  Chunk prefabs: %.4x", chunk_prefabs);
 
     load_map(pack, level, chunk_map);
-    load_tile_prefabs(pack, level, chunk_prefabs);
+    lv_load_tile_prefabs(pack, &level->prefabs, &level->num_prefabs,
+			 chunk_prefabs);
 
     /*
      * The start position selector either selects from a bunch of

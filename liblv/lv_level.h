@@ -245,6 +245,22 @@ lv_level_get_prefab_at(struct lv_level *level, unsigned x, unsigned y,
     return &level->prefabs[index & LV_PREFAB_INDEX_MASK];
 }
 
+/**
+ * Load tileset prefab information. Tileset sprites are 8x8 images,
+ * but the level tiles are 16x16. The game uses prefabs to stitch
+ * together 4 sprites to form a complete tile. The component tiles can
+ * be horizontally or vertically flipped when creating a tile.
+ *
+ * \param pack            Pack file.
+ * \param r_prefabs       Returned allocated prefab array.
+ * \param r_num_prefabs   Returned number of prefabs.
+ * \param chunk_index     Index to load the prefabs from.
+ * \returns               0 for success.
+ */
+int lv_load_tile_prefabs(struct lv_pack *pack,
+			 struct lv_tile_prefab **r_prefabs,
+			 size_t *r_num_prefabs, unsigned chunk_index);
+
 /** \} */
 
 #endif /* _LV_LEVEL_H */
