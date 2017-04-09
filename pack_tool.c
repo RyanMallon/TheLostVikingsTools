@@ -180,6 +180,7 @@ static int usage(const char *progname, int status)
 {
     printf("Usage: %s [OPTIONS...] DATA_FILE\n", progname);
     printf("\nOptions:\n");
+    printf("  -B, --blackthorne                     Pack file is Blackthorne format\n");
     printf("  -l, --list-chunks                     List chunks in data file\n");
     printf("  -r, --replace-chunk=CHUNK:FILENAME    Replace a chunk\n");
     printf("  -e, --extract-chunk=CHUNK:FILENAME    Extract raw chunk\n");
@@ -207,6 +208,7 @@ static int usage(const char *progname, int status)
 int main(int argc, char **argv)
 {
     const struct option long_options[] = {
+        {"blackthorne",       no_argument,       0, 'B'},
         {"list-chunks",       no_argument,       0, 'l'},
         {"extract-raw-chunk", required_argument, 0, 'e'},
         {"decompress-chunk",  required_argument, 0, 'd'},
@@ -215,11 +217,11 @@ int main(int argc, char **argv)
         {"help",              no_argument,       0, '?'},
         {NULL, 0, 0, 0},
     };
-    const char *short_options = "le:d:r:o:?";
+    const char *short_options = "Ble:d:r:o:?";
     struct lv_chunk *chunk;
     unsigned chunk_index;
     int i, option_index, c;
-    bool list_chunks = false, needs_repack = false;
+    bool blackthorne = false, list_chunks = false, needs_repack = false;
     const char *filename, *data_file = NULL, *outfile = NULL;
 
     while (1) {
@@ -228,6 +230,10 @@ int main(int argc, char **argv)
             break;
 
         switch (c) {
+        case 'b':
+            blackthorne = true;
+            break;
+
         case 'l':
             list_chunks = true;
             break;
@@ -270,7 +276,7 @@ int main(int argc, char **argv)
         usage(argv[0], EXIT_FAILURE);
     }
 
-    lv_pack_load(data_file, &pack);
+    lv_pack_load(data_file, &pack, blackthorne);
 
     if (list_chunks) {
         printf("%zd chunks:\n", pack.num_chunks);

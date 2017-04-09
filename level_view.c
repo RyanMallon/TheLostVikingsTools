@@ -450,7 +450,7 @@ int main(int argc, char **argv)
 
     SDL_EnableKeyRepeat(250, 50);
 
-    lv_pack_load(pack_filename, &pack);
+    lv_pack_load(pack_filename, &pack, false);
     lv_level_load(&pack, &level, chunk_level_header, chunk_object_db);
 
     sdl_load_palette(screen, level.palette, 256);

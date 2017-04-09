@@ -149,11 +149,38 @@ static void load_palette_from_level(struct lv_pack *pack, SDL_Surface *surf,
     SDL_SetPalette(surf, SDL_LOGPAL | SDL_PHYSPAL, sdl_pal, 0, 256);
 }
 
+static void load_palette_from_chunk(struct lv_pack *pack, SDL_Surface *surf,
+                                    unsigned chunk_index, bool uncompressed)
+{
+    SDL_Color sdl_pal[256];
+    uint8_t *pal_data;
+    size_t pal_size;
+    struct lv_chunk *chunk;
+    int i;
+
+    chunk = lv_pack_get_chunk(pack, chunk_index);
+    if (uncompressed)
+        pal_data = chunk->data + 4;
+    else
+        lv_decompress_chunk(chunk, &pal_data);
+    pal_size = chunk->decompressed_size - 1;
+
+    for (i = 0; i < pal_size / 3; i++) {
+        sdl_pal[i].r = pal_data[(i * 3) + 0] << 2;
+        sdl_pal[i].g = pal_data[(i * 3) + 1] << 2;
+        sdl_pal[i].b = pal_data[(i * 3) + 2] << 2;
+    }
+
+    SDL_SetPalette(surf, SDL_LOGPAL | SDL_PHYSPAL, sdl_pal, 0, pal_size / 3);
+}
+
 static void usage(const char *progname, int status)
 {
     printf("Usage: %s [OPTIONS...] FILE\n", progname);
     printf("\nOptions:\n");
+    printf("  -B, --blackthorne           Pack file is Blackthorne format\n");
     printf("  -f, --format=FORMAT         Sprite format (raw, unpacked, packed32)\n");
+    printf("  -p, --palette-chunk=INDEX   Use palette from chunk\n");
     printf("  -l, --level=LEVEL           Use palette data from level\n");
     printf("  -b, --palette-base=BASE     Base palette offset for packed32 sprites\n" );
     printf("  -u, --uncompressed          Chunk is uncompressed\n");
@@ -188,8 +215,10 @@ static void usage(const char *progname, int status)
 int main(int argc, char **argv)
 {
     const struct option long_options[] = {
+        {"blackthorne",   no_argument,       0, 'B'},
         {"format",        required_argument, 0, 'f'},
         {"level",         required_argument, 0, 'l'},
+        {"palette-chunk", required_argument, 0, 'p'},
         {"palette-base",  required_argument, 0, 'b'},
         {"uncompressed",  no_argument,       0, 'u'},
         {"splash",        no_argument,       0, 's'},
@@ -200,17 +229,17 @@ int main(int argc, char **argv)
         {"help",          no_argument,       0, '?'},
         {NULL, 0, 0, 0},
     };
-    const char *short_options = "f:l:b:usw:h:?";
+    const char *short_options = "Bf:l:p:b:usw:h:?";
     const char *pack_filename = NULL;
     SDL_Surface *screen;
     uint8_t *sprite_data;
     struct lv_pack pack;
-    struct lv_chunk *chunk, *chunk_pal;
-    bool uncompressed = false, splash = false;
+    struct lv_chunk *chunk;
+    bool blackthorne = false, uncompressed = false, splash = false;
     size_t sprite_width = 32, sprite_height = 32,
         screen_width = SCREEN_WIDTH, screen_height = SCREEN_HEIGHT, data_size;
     unsigned format = FORMAT_RAW, chunk_index, level_num = 0;
-    int c, option_index, pal_base = 0;
+    int c, option_index, pal_base = 0, pal_chunk_index = -1;
 
     while (1) {
         c = getopt_long(argc, argv, short_options, long_options, &option_index);
@@ -218,6 +247,14 @@ int main(int argc, char **argv)
             break;
 
         switch (c) {
+        case 'B':
+            blackthorne = true;
+            break;
+
+        case 'p':
+            pal_chunk_index = strtoul(optarg, NULL, 0);
+            break;
+
         case 'b':
             pal_base = strtoul(optarg, NULL, 0);
             if (pal_base < 0 || pal_base > 255) {
@@ -285,10 +322,10 @@ int main(int argc, char **argv)
         usage(argv[0], EXIT_FAILURE);
     }
 
-    lv_pack_load(pack_filename, &pack);
+    lv_pack_load(pack_filename, &pack, blackthorne);
     chunk = lv_pack_get_chunk(&pack, chunk_index);
     if (uncompressed)
-        sprite_data = chunk->data + 2;
+        sprite_data = chunk->data + chunk->data_offset;
     else
         lv_decompress_chunk(chunk, &sprite_data);
 
@@ -296,6 +333,8 @@ int main(int argc, char **argv)
 
     if (level_num > 0)
         load_palette_from_level(&pack, screen, level_num);
+    if (pal_chunk_index > 0)
+        load_palette_from_chunk(&pack, screen, pal_chunk_index, false);
 
     data_size = chunk->decompressed_size;
     if (splash) {

@@ -16,6 +16,7 @@
 #ifndef _LV_PACK_H
 #define _LV_PACK_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -36,6 +37,12 @@ struct lv_chunk {
     /** Chunk data as it appears in the data file. It may be compressed. */
     void             *data;
 
+    /**
+     * The offset that the data starts at. Data chunks have header
+     * indicating their decompressed size.
+     */
+    unsigned         data_offset;
+
     /** Start offset of the chunk in the data file. */
     uint32_t         start;
 
@@ -51,6 +58,9 @@ struct lv_chunk {
 
 /** Representation of the The Lost Vikings DATA.DAT pack file. */
 struct lv_pack {
+    /** Is this pack file for Blackthorne? */
+    bool             blackthorne;
+
     /** Array of chunks. */
     struct lv_chunk  *chunks;
 
@@ -61,11 +71,12 @@ struct lv_pack {
 /**
  * Load a Lost Vikings pack file (DATA.DAT).
  *
- * \param filename  Filename.
- * \param pack      Pack file structure.
- * \returns         0 for success.
+ * \param filename    Filename.
+ * \param pack        Pack file structure.
+ * \param blackthorne Is the pack file in the Blackthorne format?
+ * \returns           0 for success.
  */
-int lv_pack_load(const char *filename, struct lv_pack *pack);
+int lv_pack_load(const char *filename, struct lv_pack *pack, bool blackthorne);
 
 /**
  * Get a chunk from a pack file.
