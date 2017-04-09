@@ -32,6 +32,8 @@ level_view_objs :=	level_view.o		\
 
 sprite_view_objs :=	sprite_view.o
 
+tileset_view_objs :=	tileset_view.o
+
 all_objs :=		$(liblv_objs)		\
 			$(pack_tool_objs)	\
 			$(level_view_objs)	\
@@ -39,7 +41,8 @@ all_objs :=		$(liblv_objs)		\
 
 all_progs :=		pack_tool		\
 			level_view		\
-			sprite_view
+			sprite_view		\
+			tileset_view
 
 all: $(all_progs)
 
@@ -62,6 +65,10 @@ level_view: $(liblv_a) $(level_view_objs)
 sprite_view: $(liblv_a) $(sprite_view_objs)
 	@echo "  LD $@"
 	@$(CC) -o $@ $(sprite_view_objs) $(LFLAGS) $(liblv_a)
+
+tileset_view: $(liblv_a) $(tileset_view_objs)
+	@echo "  LD $@"
+	@$(CC) -o $@ $(tileset_view_objs) $(LFLAGS) $(liblv_a)
 
 .PHONY: docs
 docs: doxygen.dox
