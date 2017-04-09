@@ -230,7 +230,7 @@ int main(int argc, char **argv)
             break;
 
         switch (c) {
-        case 'b':
+        case 'B':
             blackthorne = true;
             break;
 

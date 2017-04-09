@@ -23,6 +23,9 @@
 
 #include "buffer.h"
 
+/* Flag used by some Blackthorne chunks. Use unknown. */
+#define BT_CHUNK_FLAG 0x40000000
+
 int lv_pack_load(const char *filename, struct lv_pack *pack, bool blackthorne)
 {
     struct lv_chunk *chunk, *next_chunk;
@@ -32,6 +35,7 @@ int lv_pack_load(const char *filename, struct lv_pack *pack, bool blackthorne)
     int i, err;
 
     memset(pack, 0, sizeof(*pack));
+    pack->blackthorne = blackthorne;
 
     err = buffer_init_from_file(&buf, filename);
     if (err)
@@ -70,7 +74,7 @@ int lv_pack_load(const char *filename, struct lv_pack *pack, bool blackthorne)
              * Some blackthorne chunks have a flag set in the upper bits
              * of the chunk offset. Its use it not yet known. Clear it.
              */
-            pack->chunks[i].start &= ~0x40000000;
+            pack->chunks[i].start &= ~BT_CHUNK_FLAG;
         }
     }
 
@@ -80,7 +84,7 @@ int lv_pack_load(const char *filename, struct lv_pack *pack, bool blackthorne)
 
         if (i < pack->num_chunks - 1) {
             next_chunk = &pack->chunks[i + 1];
-            chunk->size = next_chunk->start - chunk->start;
+            chunk->size = (next_chunk->start & ~BT_CHUNK_FLAG) - chunk->start;
         } else {
             chunk->size = buf.size - chunk->start;
         }
@@ -101,6 +105,7 @@ int lv_pack_load(const char *filename, struct lv_pack *pack, bool blackthorne)
             chunk->decompressed_size = val16 + 1;
             chunk->data_offset = 2;
         }
+
 
         chunk->data = malloc(chunk->size);
         if (!chunk->data)
