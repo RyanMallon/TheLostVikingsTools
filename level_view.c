@@ -96,7 +96,7 @@ static SDL_Surface *load_tileset(unsigned chunk_index)
     pixels = surf->pixels;
     for (i = 0; i < num_tiles; i++)
         lv_sprite_draw_raw(data + (i * TILE_SIZE), TILE_WIDTH, TILE_HEIGHT,
-			   pixels, i * TILE_WIDTH, 0, surf->w);
+			   false, false, pixels, i * TILE_WIDTH, 0, surf->w);
     SDL_UnlockSurface(surf);
 
     free(data);
