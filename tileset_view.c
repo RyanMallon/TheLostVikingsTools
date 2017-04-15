@@ -26,14 +26,15 @@
 #include <liblv/lv_level.h>
 #include <liblv/common.h>
 
-#define SCREEN_WIDTH	(32 * 16)
-#define SCREEN_HEIGHT	(32 * 8)
+#define TILE_SIZE      8
+#define TILE_DATA_SIZE (TILE_SIZE * TILE_SIZE)
 
-#define TILE_WIDTH      8
-#define TILE_HEIGHT     8
-#define TILE_SIZE       (TILE_WIDTH * TILE_HEIGHT)
+#define PREFAB_SIZE    (TILE_SIZE * 2)
 
-#define GAP             2
+#define GAP            2
+#define SCREEN_WIDTH   ((PREFAB_SIZE + GAP) * 32)
+#define SCREEN_HEIGHT  ((PREFAB_SIZE + GAP) * 32)
+
 
 static void draw_tile(SDL_Surface *surf, const uint8_t *sprite_data,
                       unsigned tile, unsigned flags, unsigned x, unsigned y)
@@ -43,7 +44,8 @@ static void draw_tile(SDL_Surface *surf, const uint8_t *sprite_data,
     flip_horiz = !!(flags & LV_PREFAB_FLAG_FLIP_HORIZ);
     flip_vert  = !!(flags & LV_PREFAB_FLAG_FLIP_VERT);
 
-    lv_sprite_draw_raw(&sprite_data[TILE_SIZE * tile], TILE_WIDTH, TILE_HEIGHT,
+    lv_sprite_draw_raw(&sprite_data[TILE_DATA_SIZE * tile],
+                       TILE_SIZE, TILE_SIZE,
                        flip_horiz, flip_vert, surf->pixels, x, y, surf->w);
 }
 
@@ -51,9 +53,9 @@ static void draw_prefab(SDL_Surface *surf, const uint8_t *sprite_data,
                         struct lv_tile_prefab *prefab, unsigned x, unsigned y)
 {
     draw_tile(surf, sprite_data, prefab->tile[0], prefab->flags[0], x, y);
-    draw_tile(surf, sprite_data, prefab->tile[1], prefab->flags[1], x + TILE_WIDTH, y);
-    draw_tile(surf, sprite_data, prefab->tile[2], prefab->flags[2], x, y + TILE_HEIGHT);
-    draw_tile(surf, sprite_data, prefab->tile[3], prefab->flags[3], x + TILE_WIDTH, y + TILE_HEIGHT);
+    draw_tile(surf, sprite_data, prefab->tile[1], prefab->flags[1], x + TILE_SIZE, y);
+    draw_tile(surf, sprite_data, prefab->tile[2], prefab->flags[2], x, y + TILE_SIZE);
+    draw_tile(surf, sprite_data, prefab->tile[3], prefab->flags[3], x + TILE_SIZE, y + TILE_SIZE);
 }
 
 static void load_palette_from_chunk(struct lv_pack *pack, SDL_Surface *surf,
@@ -163,10 +165,10 @@ int main(int argc, char **argv)
     for (i = 0; i < num_prefabs; i++) {
         draw_prefab(screen, sprite_data, &prefabs[i], x, y);
 
-        x += (TILE_WIDTH * 2) + GAP;
-        if (x > SCREEN_WIDTH - ((TILE_WIDTH * 2) + GAP)) {
+        x += PREFAB_SIZE + GAP;
+        if (x > SCREEN_WIDTH - (PREFAB_SIZE + GAP)) {
             x = 0;
-            y += (TILE_HEIGHT * 2) + GAP;
+            y += PREFAB_SIZE + GAP;
         }
     }
 
