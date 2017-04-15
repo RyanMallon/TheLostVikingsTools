@@ -61,12 +61,18 @@ int lv_pack_load(const char *filename, struct lv_pack *pack, bool blackthorne)
         return -1;
 
     /* Get the starting offset of each chunk */
-    if (pack->blackthorne)
-        buffer_seek(&buf, 4);
-    else
-        buffer_seek(&buf, 0);
+    buffer_seek(&buf, 0);
 
     for (i = 0; i < pack->num_chunks; i++) {
+        /*
+         * Blackthorne doesn't have a chunk zero because of the 4-byte
+         * pack header.
+         */
+        if (blackthorne && i == 0 ) {
+            buffer_get_le32(&buf, &val32);
+            continue;
+        }
+
         buffer_get_le32(&buf, &pack->chunks[i].start);
 
         if (pack->blackthorne) {
