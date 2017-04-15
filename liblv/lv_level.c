@@ -26,7 +26,7 @@
 #include "common.h"
 
 /* These are hardcoded in VIKINGS.EXE */
-static const struct lv_level_info level_info[] = {
+static const struct lv_level_info lv_level_info[] = {
     /* World 1 - Spaceship */
     {198, 449}, {200, 449}, {202, 449}, {204, 449},
 
@@ -65,9 +65,48 @@ static const struct lv_level_info level_info[] = {
     {218, 454}, /* Viking ship ending */
 };
 
-const struct lv_level_info *lv_level_get_info(unsigned level_num)
+/* These are hardcoded in BTHORNE.EXE */
+static const struct lv_level_info bt_level_info[] = {
+    /* Cutscene - game start */
+    {0x7b, 0xffff},
+
+    /* Mines */
+    {0xc0, 0xffff}, {0xc1, 0xffff}, {0xc2, 0xffff}, {0xc3, 0xffff},
+
+    /* Forest */
+    {0xcc, 0xffff}, {0xcd, 0xffff}, {0xce, 0xffff}, {0xcf, 0xffff},
+
+    /* Canyons */
+    {0xda, 0xffff}, {0xdb, 0xffff}, {0xdc, 0xffff}, {0xdd, 0xffff},
+
+    /* Castle */
+    {0xec, 0xffff}, {0xed, 0xffff}, {0xee, 0xffff}, {0xef, 0xffff},
+
+    /* Sarlac boss fight level */
+    {0x0f0, 0xffff},
+
+    /* Cutscenes */
+    {0x0c5, 0xffff}, {0x0d0, 0xffff}, {0x0de, 0xffff}, {0x15b, 0xffff},
+
+    /* Game over */
+    {0x075, 0xffff},
+};
+
+const struct lv_level_info *lv_level_get_info(struct lv_pack *pack,
+                                              unsigned level_num)
 {
-    if (level_num < 1 || level_num >= ARRAY_SIZE(level_info))
+    const struct lv_level_info *level_info;
+    size_t num_levels;
+
+    if (pack->blackthorne) {
+        level_info = bt_level_info;
+        num_levels = ARRAY_SIZE(bt_level_info);
+    } else {
+        level_info = lv_level_info;
+        num_levels = ARRAY_SIZE(lv_level_info);
+    }
+
+    if (level_num < 1 || level_num >= num_levels)
         return NULL;
 
     return &level_info[level_num - 1];
@@ -169,8 +208,8 @@ int lv_load_tile_prefabs(struct lv_pack *pack,
     return 0;
 }
 
-static int load_header(struct lv_pack *pack, struct lv_level *level,
-                       struct buffer *buf)
+static int load_lv_header(struct lv_pack *pack, struct lv_level *level,
+                          struct buffer *buf)
 {
     uint16_t width, height, chunk_map, chunk_tileset, chunk_prefabs,
         vikings_xoff, vikings_yoff, vikings_flags, dummy_16;
@@ -351,7 +390,7 @@ static int load_palette(struct lv_pack *pack, struct lv_level *level,
 
         lv_decompress_chunk(chunk, &data);
 
-        lv_debug(LV_DEBUG_LEVEL, "  Chunk %.4x, base_color=%.3d (%.2zd colors)",
+        lv_debug(LV_DEBUG_LEVEL, "  Chunk %.4x, base_color=%02x (%3zd colors)",
                  chunk_index, base_color, chunk->decompressed_size / 3);
 
         chunk = lv_pack_get_chunk(pack, chunk_index);
@@ -410,6 +449,35 @@ static int load_palette_animations(struct lv_pack *pack, struct lv_level *level,
     return 0;
 }
 
+static int load_raw_sprite_sets(struct lv_pack *pack, struct lv_level *level,
+                                struct buffer *buf)
+{
+    uint16_t chunk_index;
+    uint8_t a, b, c;
+
+    /*
+     * Entries are 5 bytes (max 16 entries)
+     * u16: 0xffff ends
+     *  u8:
+     *  u8: Multiplied with previous
+     *  u8:
+     */
+    lv_debug(LV_DEBUG_LEVEL, "Loading raw sprite sets:");
+    while (1) {
+        buffer_get_le16(buf, &chunk_index);
+        if (chunk_index == 0xffff)
+            break;
+        buffer_get_u8(buf, &a);
+        buffer_get_u8(buf, &b);
+        buffer_get_u8(buf, &c);
+
+        lv_debug(LV_DEBUG_LEVEL, "  Chunk=%03x: %.2x %.2x %.2x",
+                 chunk_index, a, b, c);
+    }
+
+    return 0;
+}
+
 static int load_unpacked_sprite_sets(struct lv_pack *pack,
                                      struct lv_level *level, struct buffer *buf)
 {
@@ -418,7 +486,7 @@ static int load_unpacked_sprite_sets(struct lv_pack *pack,
     uint16_t chunk_index, a, b;
 
     /*
-     * Entries are 6 bytes:
+     * Entries are 6 bytes (Blackthorne limits to 32 entries)
      *   [00] u16: Chunk index - 0xffff ends
      *   [02] u16:
      *   [04] u16:
@@ -446,9 +514,8 @@ static int load_unpacked_sprite_sets(struct lv_pack *pack,
         set->data_size = chunk->decompressed_size;
         set->num_sprites = 0;
 
-        lv_debug(LV_DEBUG_LEVEL, "  [%.2zx] chunk %.4d (%.4x): %.4x:%.4x",
-		 level->num_sprite_unpacked_sets, set->chunk_index,
-		 set->chunk_index, a, b);
+        lv_debug(LV_DEBUG_LEVEL, "  [%.2zx] chunk %03x: %.4x:%.4x",
+		 level->num_sprite_unpacked_sets, set->chunk_index, a, b);
 
         level->num_sprite_unpacked_sets++;
     }
@@ -565,6 +632,161 @@ static void update_unpacked_sprite_sets(struct lv_level *level)
     }
 }
 
+static void load_something(struct lv_pack *pack, struct lv_level *level,
+                           struct buffer *buf)
+{
+    uint16_t header, e, f;
+    uint8_t a, b, c, d;
+
+    /*
+     * Header: u16 - unknown
+     *
+     * Entries are 8 bytes:
+     *   [00]  u8: Unknown - zero ends
+     *   [01]  u8:
+     *   [02]  u8:
+     *   [03]  u8:
+     *   [04] u16:
+     *   [06] u16:
+     */
+    buffer_get_le16(buf, &header);
+    lv_debug(LV_DEBUG_LEVEL, "Loading something: header=%.4x", header);
+    while (1) {
+        buffer_get_u8(buf, &a);
+        if (a == 0)
+            break;
+        buffer_get_u8(buf, &b);
+        buffer_get_u8(buf, &c);
+        buffer_get_u8(buf, &d);
+        buffer_get_le16(buf, &e);
+        buffer_get_le16(buf, &f);
+        lv_debug(LV_DEBUG_LEVEL, "  %.2x %.2x %.2x %.2x %.4x %.4x",
+                 a, b, c, d, e, f);
+    }
+}
+
+static void load_something2(struct lv_pack *pack, struct lv_level *level,
+                            struct buffer *buf)
+{
+    uint8_t a, b[9];
+
+    /*
+     * Entries are 10 bytes:
+     *   [00]  u8: unknown - 0xff ends
+     *   ....      unknown
+     */
+    lv_debug(LV_DEBUG_LEVEL, "Loading something2");
+    while (1) {
+        buffer_get_u8(buf, &a);
+        if (a == 0xff)
+            break;
+        buffer_get(buf, b, sizeof(b));
+        lv_debug(LV_DEBUG_LEVEL,
+                 "  %.2x: %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x",
+                 a, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
+    }
+}
+
+static void load_something3(struct lv_pack *pack, struct lv_level *level,
+                            struct buffer *buf)
+{
+    uint16_t a;
+    uint8_t b, c;
+
+    /*
+     * Entries are 4 bytes:
+     *   [00] u16: 0xffff ends
+     *   [02]  u8:
+     *   [03]  u8: multiply with previous
+     */
+    lv_debug(LV_DEBUG_LEVEL, "Loading something3");
+    while (1) {
+        buffer_get_le16(buf, &a);
+        if (a == 0xffff)
+            break;
+        buffer_get_u8(buf, &b);
+        buffer_get_u8(buf, &c);
+        lv_debug(LV_DEBUG_LEVEL, "  %.4x: %.2x %.2x", a, b, c);
+    }
+
+}
+
+
+static int load_bt_level(struct lv_pack *pack, struct lv_level *level,
+                         struct buffer *buf)
+{
+    uint16_t width, height, chunk_index_map, chunk_index_tileset,
+        chunk_index_prefabs;
+    uint8_t dummy;
+
+    /*
+     * [1c] u16: Level width (tiles)
+     * [1e] u16: Level height (tiles)
+     * [20]  u8: Unknown
+     * [21] u16: Level map chunk index
+     * [23] u16: Level tileset chunk index
+     * [25] u16: Level prefabs chunk index
+     * [27] u16: Background width (tiles)
+     * [29] u16: Background height (tiles)
+     * [2b]  u8: Unknown
+     * [2c] u16: Background map chunk index
+     * [2e] u16: Background tileset chunk index?
+     * [30] u16: Background prefabs chunk index?
+     */
+    buffer_seek(buf, 0x1c);
+    buffer_get_le16(buf, &width);
+    buffer_get_le16(buf, &height);
+    buffer_get_u8(buf, &dummy);
+    buffer_get_le16(buf, &chunk_index_map);
+    buffer_get_le16(buf, &chunk_index_tileset);
+    buffer_get_le16(buf, &chunk_index_prefabs);
+
+    lv_debug(LV_DEBUG_LEVEL, "  Map size:      %dx%d (%dx%d rooms)",
+             width, height, width / 16, height / 14);
+    lv_debug(LV_DEBUG_LEVEL, "  Map chunk:     %3x", chunk_index_map);
+    lv_debug(LV_DEBUG_LEVEL, "  Tileset chunk: %3x", chunk_index_tileset);
+    lv_debug(LV_DEBUG_LEVEL, "  Prefabs chunk: %3x", chunk_index_prefabs);
+
+    level->width = width;
+    level->height = height;
+    level->chunk_tileset = chunk_index_tileset;
+
+    load_map(pack, level, chunk_index_map);
+    lv_load_tile_prefabs(pack, &level->prefabs, &level->num_prefabs,
+                         chunk_index_prefabs);
+
+    buffer_seek(buf, 0x36);
+    load_objects(level, buf);
+    load_palette(pack, level, buf);
+    load_palette_animations(pack, level, buf);
+    load_something(pack, level, buf);
+    load_unpacked_sprite_sets(pack, level, buf);
+    load_raw_sprite_sets(pack, level, buf);
+    load_something2(pack, level, buf);
+    load_something3(pack, level, buf);
+
+    return 0;
+}
+
+static int load_lv_level(struct lv_pack *pack, struct lv_level *level,
+                         struct buffer *buf, unsigned chunk_object_db)
+{
+    load_lv_header(pack, level, buf);
+    load_objects(level, buf);
+    load_palette(pack, level, buf);
+    load_palette_animations(pack, level, buf);
+    load_unpacked_sprite_sets(pack, level, buf);
+    load_sprite32_sets(pack, level, buf);
+
+    /* Load the object database */
+    if (chunk_object_db != 0xffff) {
+        lv_object_db_load(pack, &level->object_db, chunk_object_db);
+        update_unpacked_sprite_sets(level);
+    }
+
+    return 0;
+}
+
 int lv_level_load(struct lv_pack *pack, struct lv_level *level,
                   unsigned chunk_header, unsigned chunk_object_db)
 {
@@ -576,21 +798,13 @@ int lv_level_load(struct lv_pack *pack, struct lv_level *level,
 
     chunk = lv_pack_get_chunk(pack, chunk_header);
     lv_decompress_chunk(chunk, &data);
-
     buffer_init_from_data(&buf, data, chunk->decompressed_size);
-    load_header(pack, level, &buf);
-    load_objects(level, &buf);
-    load_palette(pack, level, &buf);
-    load_palette_animations(pack, level, &buf);
-    load_unpacked_sprite_sets(pack, level, &buf);
-    load_sprite32_sets(pack, level, &buf);
+
+    if (pack->blackthorne)
+        load_bt_level(pack, level, &buf);
+    else
+        load_lv_level(pack, level, &buf, chunk_object_db);
+
     free(data);
-
-    /* Load the object database */
-    if (chunk_object_db != 0xffff) {
-        lv_object_db_load(pack, &level->object_db, chunk_object_db);
-        update_unpacked_sprite_sets(level);
-    }
-
     return 0;
 }

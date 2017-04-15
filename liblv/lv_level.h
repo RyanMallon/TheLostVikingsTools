@@ -204,10 +204,12 @@ struct lv_level {
  * Get the level information structure for a given level number. This is
  * used to determine which chunks are needed to load the level.
  *
+ * \param pack       Pack file.
  * \param level_num  Level number (numbering starts at 1).
  * \returns          Level information or NULL if the level is not found.
  */
-const struct lv_level_info *lv_level_get_info(unsigned level_num);
+const struct lv_level_info *lv_level_get_info(struct lv_pack *pack,
+					      unsigned level_num);
 
 /**
  * Load a level. This loads and initialises all data associated with a single

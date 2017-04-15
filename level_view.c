@@ -25,6 +25,7 @@
 #include <liblv/lv_level.h>
 #include <liblv/lv_sprite.h>
 #include <liblv/lv_object_db.h>
+#include <liblv/lv_debug.h>
 
 #include "sdl_helpers.h"
 
@@ -421,39 +422,138 @@ static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
     }
 }
 
+static void load_pal_from_chunk(unsigned chunk_pal)
+{
+    struct lv_chunk *chunk;
+    uint8_t *data;
+    size_t pal_size;
+
+    chunk = lv_pack_get_chunk(&pack, chunk_pal);
+    lv_decompress_chunk(chunk, &data);
+
+    pal_size = chunk->decompressed_size;
+    if (pal_size > sizeof(level.palette))
+        pal_size = sizeof(level.palette);
+    memcpy(level.palette, data, pal_size);
+}
+
+static void usage(const char *progname, int status)
+{
+    printf("Usage: %s [OPTIONS...] PACK_FILE LEVEL_NUM\n",
+           progname);
+    printf("\nOptions:\n");
+    printf("  -B, --blackthorne  View Blackthorne levels\n");
+    exit(status);
+}
+
 int main(int argc, char **argv)
 {
+    const struct option long_options[] = {
+        {"blackthorne",     no_argument,       0, 'B'},
+        {"debug",           required_argument, 0, 'd'},
+        {"chunk-header",    no_argument,       0, 'h'},
+        {"chunk-object-db", no_argument,       0, 'D'},
+
+        // temporary options for blackthorne
+        {"pal",             required_argument, 0, 'P'},
+    };
+    const char *short_options = "Bd:h:D:" "P:";
     const char *pack_filename;
     SDL_Surface *surf_tileset, *surf_map;
-    unsigned level_num, chunk_level_header, chunk_object_db;
+    unsigned debug_flags = 0, chunk_level_header = 0xffff,
+        chunk_object_db = 0xffff, level_num;
     const struct lv_level_info *level_info;
+    bool blackthorne = false;
+    int c, option_index;
 
-    pack_filename      = argv[1];
-    level_num          = strtoul(argv[2], NULL, 0);
+    // temporary
+    int chunk_pal = -1;
 
-    level_info = lv_level_get_info(level_num);
+    while (1) {
+        c = getopt_long(argc, argv, short_options, long_options, &option_index);
+        if (c == -1)
+            break;
+
+        switch (c) {
+        case 'B':
+            blackthorne = true;
+            break;
+
+        case 'd':
+            debug_flags = strtoul(optarg, NULL, 0);
+            break;
+
+        case 'h':
+            chunk_level_header = strtoul(optarg, NULL, 0);
+            break;
+
+        case 'D':
+            chunk_object_db = strtoul(optarg, NULL, 0);
+            break;
+
+            // temporary
+        case 'P':
+            chunk_pal = strtoul(optarg, NULL, 0);
+            break;
+
+        default:
+            printf("Unknown argument '%c'\n", c);
+            usage(argv[0], EXIT_FAILURE);
+	}
+    }
+
+    if (optind == argc - 2) {
+        pack_filename = argv[optind++];
+        level_num = strtoul(argv[optind++], NULL, 0);
+    } else {
+        printf("No pack file or level number specified\n");
+        usage(argv[0], EXIT_FAILURE);
+    }
+
+    if (debug_flags)
+        lv_debug_toggle(debug_flags);
+
+    lv_pack_load(pack_filename, &pack, blackthorne);
+
+    /*
+     * Get the chunk indexes for this level. These are hardcoded in the
+     * game binaries. Allow overriding the indexes.
+     */
+    level_info = lv_level_get_info(&pack, level_num);
     if (!level_info) {
         printf("Bad level number\n");
         exit(EXIT_FAILURE);
     }
+    if (chunk_level_header == 0xffff)
+        chunk_level_header = level_info->chunk_level_header;
+    if (chunk_object_db == 0xffff)
+        chunk_object_db = level_info->chunk_object_db;
 
-    chunk_level_header = level_info->chunk_level_header;
-    chunk_object_db    = level_info->chunk_object_db;
+    lv_level_load(&pack, &level, chunk_level_header, chunk_object_db);
 
-    printf("Level %d:\n", level_num + 1);
+    printf("%s level %d:\n",
+           pack.blackthorne ? "Blackthorne" : "The Lost Vikings",
+           level_num + 1);
     printf("    Chunk header:   %4d (%.4x)\n",
            chunk_level_header, chunk_level_header);
     printf("    Chunk objectdb: %4d (%.4x)\n",
            chunk_object_db, chunk_object_db);
+    if (pack.blackthorne)
+        printf("    Level size:     %dx%d (%dx%d rooms)\n",
+               level.width, level.height, level.width / 16, level.height / 14);
+    else
+        printf("    Level size:     %dx%d\n", level.width, level.height);
 
     screen = sdl_init();
 
     SDL_EnableKeyRepeat(250, 50);
 
-    lv_pack_load(pack_filename, &pack, false);
-    lv_level_load(&pack, &level, chunk_level_header, chunk_object_db);
+    // FIXME
+    if (chunk_pal >= 0)
+        load_pal_from_chunk(chunk_pal);
 
     sdl_load_palette(screen, level.palette, 256);
+
     surf_tileset = load_tileset(level.chunk_tileset);
 
     surf_map = create_level_surface(&level);
