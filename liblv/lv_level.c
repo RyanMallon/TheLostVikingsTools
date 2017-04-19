@@ -373,7 +373,7 @@ static int load_palette(struct lv_pack *pack, struct lv_level *level,
     uint8_t *data;
 
     /*
-     * Entries are 3-bytes
+     * Entries are 3-bytes (Blackthorne limits to 8 entries)
      *   [00] u16: Palette chunk index - 0xffff ends
      *   [02]  u8: Base color
      */
