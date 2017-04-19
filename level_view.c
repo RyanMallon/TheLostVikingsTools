@@ -427,27 +427,15 @@ static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
     }
 }
 
-static void load_pal_from_chunk(unsigned chunk_pal)
-{
-    struct lv_chunk *chunk;
-    uint8_t *data;
-    size_t pal_size;
-
-    chunk = lv_pack_get_chunk(&pack, chunk_pal);
-    lv_decompress_chunk(chunk, &data);
-
-    pal_size = chunk->decompressed_size;
-    if (pal_size > sizeof(level.palette))
-        pal_size = sizeof(level.palette);
-    memcpy(level.palette, data, pal_size);
-}
-
 static void usage(const char *progname, int status)
 {
     printf("Usage: %s [OPTIONS...] PACK_FILE LEVEL_NUM\n",
            progname);
     printf("\nOptions:\n");
-    printf("  -B, --blackthorne  View Blackthorne levels\n");
+    printf("  -B, --blackthorne            View Blackthorne levels\n");
+    printf("  -d, --debug=FLAGS            Enable debugging\n");
+    printf("  -h, --chunk-header=CHUNK     Level header chunk (overrides level)\n");
+    printf("  -D, --chunk-object-db=CHUNK  Level object DB chunk (overrides level)\n");
     exit(status);
 }
 
@@ -458,11 +446,8 @@ int main(int argc, char **argv)
         {"debug",           required_argument, 0, 'd'},
         {"chunk-header",    no_argument,       0, 'h'},
         {"chunk-object-db", no_argument,       0, 'D'},
-
-        // temporary options for blackthorne
-        {"pal",             required_argument, 0, 'P'},
     };
-    const char *short_options = "Bd:h:D:" "P:";
+    const char *short_options = "Bd:h:D:";
     const char *pack_filename;
     SDL_Surface *surf_tileset, *surf_map;
     unsigned debug_flags = 0, chunk_level_header = 0xffff,
@@ -470,9 +455,6 @@ int main(int argc, char **argv)
     const struct lv_level_info *level_info;
     bool blackthorne = false;
     int c, option_index;
-
-    // temporary
-    int chunk_pal = -1;
 
     while (1) {
         c = getopt_long(argc, argv, short_options, long_options, &option_index);
@@ -494,11 +476,6 @@ int main(int argc, char **argv)
 
         case 'D':
             chunk_object_db = strtoul(optarg, NULL, 0);
-            break;
-
-            // temporary
-        case 'P':
-            chunk_pal = strtoul(optarg, NULL, 0);
             break;
 
         default:
@@ -552,10 +529,6 @@ int main(int argc, char **argv)
     screen = sdl_init();
 
     SDL_EnableKeyRepeat(250, 50);
-
-    // FIXME
-    if (chunk_pal >= 0)
-        load_pal_from_chunk(chunk_pal);
 
     sdl_load_palette(screen, level.palette, 256);
 
