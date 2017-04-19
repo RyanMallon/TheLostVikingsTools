@@ -35,9 +35,11 @@
 #define LV_PREFAB_INDEX_MASK        0x1ff
 #define LV_PREFAB_FLAGS_SHIFT       9
 #define LV_PREFAB_FLAGS_MASK        0x7f
+
 #define LV_PREFAB_FLAG_FOREGROUND   0x08
 #define LV_PREFAB_FLAG_FLIP_HORIZ   0x10
 #define LV_PREFAB_FLAG_FLIP_VERT    0x20
+#define LV_PREFAB_FLAG_COLOR_MASK   0x7
 
 /* Maximum array sizes as defined by VIKINGS.EXE */
 #define LV_MAX_SPRITE32_SETS   0x10
