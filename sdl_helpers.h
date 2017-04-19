@@ -24,9 +24,9 @@
 void sdl_load_palette(SDL_Surface *surf, uint8_t *pal, size_t num_colors);
 struct SDL_Surface *sdl_create_surf(SDL_Surface *parent,
 				    size_t width, size_t height);
-void sdl_blit_flip(SDL_Surface *src, SDL_Rect *src_rect,
-                   SDL_Surface *dst, SDL_Rect *dst_rect,
-                   bool flip_horiz, bool flip_vert);
+void sdl_blit(SDL_Surface *src, SDL_Rect *src_rect,
+	      SDL_Surface *dst, SDL_Rect *dst_rect,
+	      uint8_t base_color, bool flip_horiz, bool flip_vert);
 void sdl_draw_line(SDL_Surface *surf, unsigned x1, unsigned y1,
                    unsigned x2, unsigned y2, unsigned color);
 void sdl_vline(SDL_Surface *surf, unsigned x, unsigned y1,

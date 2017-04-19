@@ -67,11 +67,11 @@ struct SDL_Surface *sdl_create_surf(SDL_Surface *parent,
     return surf;
 }
 
-void sdl_blit_flip(SDL_Surface *src, SDL_Rect *src_rect,
-                   SDL_Surface *dst, SDL_Rect *dst_rect,
-                   bool flip_horiz, bool flip_vert)
+void sdl_blit(SDL_Surface *src, SDL_Rect *src_rect,
+              SDL_Surface *dst, SDL_Rect *dst_rect,
+              uint8_t base_color, bool flip_horiz, bool flip_vert)
 {
-    uint8_t *src_pixels, *dst_pixels;
+    uint8_t *src_pixels, *dst_pixels, pixel;
     unsigned x, y, src_base, dst_base;
 
     dst_pixels = dst->pixels;
@@ -87,10 +87,11 @@ void sdl_blit_flip(SDL_Surface *src, SDL_Rect *src_rect,
             dst_base = ((y + dst_rect->y) * dst->w) + dst_rect->x;
 
         for (x = 0; x < src_rect->w; x++) {
+            pixel = src_pixels[src_base + x] + base_color;
             if (flip_horiz)
-                dst_pixels[dst_base + dst_rect->w - x - 1] = src_pixels[src_base + x];
+                dst_pixels[dst_base + dst_rect->w - x - 1] = pixel;
             else
-                dst_pixels[dst_base + x] = src_pixels[src_base + x];
+                dst_pixels[dst_base + x] = pixel;
         }
     }
 }

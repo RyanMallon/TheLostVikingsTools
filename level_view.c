@@ -108,6 +108,7 @@ static void draw_tile(SDL_Surface *surf, SDL_Surface *surf_tileset,
                       unsigned tile, unsigned flags, unsigned x, unsigned y)
 {
     SDL_Rect src_rect, dst_rect;
+    uint8_t base_color;
 
     if (!draw_foreground && (flags & LV_PREFAB_FLAG_FOREGROUND))
         return;
@@ -124,12 +125,16 @@ static void draw_tile(SDL_Surface *surf, SDL_Surface *surf_tileset,
     dst_rect.w = TILE_WIDTH;
     dst_rect.h = TILE_HEIGHT;
 
-    if (flags & (LV_PREFAB_FLAG_FLIP_HORIZ | LV_PREFAB_FLAG_FLIP_VERT))
-        sdl_blit_flip(surf_tileset, &src_rect, surf, &dst_rect,
-                      flags & LV_PREFAB_FLAG_FLIP_HORIZ,
-                      flags & LV_PREFAB_FLAG_FLIP_VERT);
-    else
-        SDL_BlitSurface(surf_tileset, &src_rect, surf, &dst_rect);
+    /*
+     * The lower bits of the prefab flags specify which set of 16 color
+     * palette to use. This is only used by Blackthorne, the bits appear
+     * unused by The Lost Vikings.
+     */
+    base_color = (flags & LV_PREFAB_FLAG_COLOR_MASK) * 0x10;
+
+    sdl_blit(surf_tileset, &src_rect, surf, &dst_rect, base_color,
+             flags & LV_PREFAB_FLAG_FLIP_HORIZ,
+             flags & LV_PREFAB_FLAG_FLIP_VERT);
 }
 
 static void draw_prefab(SDL_Surface *surf, SDL_Surface *surf_tileset,
@@ -270,7 +275,7 @@ static void draw_level(SDL_Surface *surf, SDL_Surface *surf_tileset)
 
 static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
 {
-    unsigned xoff = 0, yoff = 0, tx, ty;
+    unsigned xoff = 0, yoff = 0, tx, ty, flags;
     int mouse_x = 0, mouse_y = 0, i;
     SDL_Rect rect;
     SDL_Event event;
@@ -352,10 +357,10 @@ static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
                     tx = (mouse_x + xoff) / PREFAB_WIDTH;
                     ty = (mouse_y + yoff) / PREFAB_HEIGHT;
 
-                    prefab = lv_level_get_prefab_at(&level, tx, ty, NULL);
+                    prefab = lv_level_get_prefab_at(&level, tx, ty, &flags);
 
-                    printf("Tile at %d, %d: %.4x\n", tx, ty,
-                           level.map[(ty * level.width) + tx]);
+                    printf("Tile at %d, %d: %.4x, flags=%.2x\n", tx, ty,
+                           level.map[(ty * level.width) + tx], flags);
                     for (i = 0; i < 4; i++)
                         printf("  [%.2x]: %.4x: %.4x\n",
                                i, prefab->tile[i], prefab->flags[i]);
