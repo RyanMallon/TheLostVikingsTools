@@ -88,7 +88,8 @@ static void usage(const char *progname, int status)
     printf("Usage: %s [OPTIONS...] PACK_FILE TILESET_CHUNK PREFABS_CHUNK\n",
            progname);
     printf("\nOptions:\n");
-    printf("  -B, --blackthorne  Pack file is Blackthorne format\n");
+    printf("  -B, --blackthorne    Pack file is Blackthorne format\n");
+    printf("  -p, --palette=CHUNK  Load palette from chunk\n");
     exit(status);
 }
 
