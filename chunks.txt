@@ -1,28 +1,179 @@
 Useful Chunk Indexes
 ====================
 
-  [000]: Header (magic numbers?)
-  [001]: Uncompressed hud background image
-  [002]: Font/text box images
-  [003]: Base palette (first 16 colors)
-  [004]: Hud Erik selected image
-  [005]: Hud Baleog selected image
-  [006]: Hud Olaf selected image
-  [007]: Hud Erik gray image
-  [008]: Hud Baleog gray image
-  [009]: Hud Olaf gray image
-  [010]: Hud Erik dead image
-  [011]: Hud Baleog dead image
-  [012]: Hud Olaf dead image
-  [013]: Hud health images
-  [014]: Hud item images
+Chunk indexes are all in hexadecimal.
 
-Chunks 18...219 (approx) store level data (header, tileset, palette, map).
+The Lost Vikings
+----------------
 
-Chunks 220...378 (approx) store sprites. These are mostly in packed32 and
+000: Header (magic numbers?)
+001: Uncompressed hud background image
+002: Font/text box images
+003: Base palette (first 16 colors)
+004: Hud Erik selected image
+005: Hud Baleog selected image
+006: Hud Olaf selected image
+007: Hud Erik gray image
+008: Hud Baleog gray image
+009: Hud Olaf gray image
+00a: Hud Erik dead image
+00b: Hud Baleog dead image
+00c: Hud Olaf dead image
+00d: Hud health images
+00e: Hud item images
+
+Chunks 012...0db (approx) store level data (header, tileset, palette, map).
+
+Chunks 0dc...17a (approx) store sprites. These are mostly in packed32 and
 unpacked (various sizes) formats.
 
-Chunks 379...454 (approx) store special levels, splash screens, etc.
+Chunks 17b...1c6 (approx) store special levels, splash screens, etc.
 The special levels include the company logos, demo, ending, etc.
 
-Chunks 455+ (approx) store music tracks.
+Chunks 1c7+ (approx) store music tracks.
+
+Blackthorne
+-----------
+
+012..025: audio (xmi)
+026..040: audio (creative voice)
+
+042: sprites (raw 16x16, compressed)
+043: sprites (raw 16x16, compressed)
+044: sprites (raw 16x16, compressed)
+045: sprites (raw 16x16, compressed)
+046: sprites (raw 16x16, compressed)
+047: sprites (raw 16x16, compressed)
+048: palette (16 colors, red)
+049: palette (16 colors, hud?)
+
+04c: sprites (raw 32x32) - Hud items
+04d: sprites (unpacked 32x32) - character portraits
+04e: health bar (16x16, unpacked, compressed)
+
+04f..05b: palettes (16 colors each)
+
+05d: tileset  - interplay
+05f: prefabs  - interplay
+060: map data - interplay
+061: header   - interplay
+
+063: tileset  - blizzard
+065: prefabs  - blizzard
+066: map data - blizzard
+067: header   - blizzard
+
+069: tileset  - blackthorne logo (also has blackthorne silhoutte)
+06b: prefabs  - blackthorne logo
+06c: map data - blackthorne logo
+06e: header   - blackthorne logo
+
+071: tileset  - game over
+073: prefabs  - game over
+074: map data - game over
+075: header   - game over
+
+077: tileset  - castle
+079: prefabs  - castle
+07a: map data - castle
+07b: header   - castle
+
+07d: palette  - sarlac
+07e: tileset  - sarlac
+080: prefabs  - sarlac
+083: header   - sarlac
+085: header   - sarlac (alt?)
+
+08d: palette  - sarlac's minions
+08e: tileset  - sarlac's minions
+090: prefabs  - sarlac's minions
+091: map data - sarlac's minions
+092: header   - sarlac's minions
+
+097: tileset  - sarlac hand
+099: prefabs  - sarlac hand
+09a: map data - sarlac hand
+09c: header   - sarlac hand
+
+09e: palette  - castle fire
+09f: tileset  - castle fire
+0a1: prefabs  - castle fire
+0a2: map data - castle fire
+0a3: header   - castle fire
+
+0a7: tileset  - throne
+0a9: prefabs  - throne
+0aa: map data - throne
+0ad: header   - throne
+
+0af: tileset  - desert
+0b1: prefabs  - desert
+0b2: map dat  - desert
+0b3: header   - desert
+
+0b5: tileset  - world
+0b7: prefabs  - world
+
+0b8: map (7x1)
+0b9: background (7x1)
+0ba: map (5x3)
+0bb: background (5x3)
+0bc: map (8x5)
+
+0c0: level header
+0c1: level header
+
+0c7: tileset  - world
+0c9: prefabs  - world
+
+0d4: palette
+0d5: tileset  - world
+0d7: prefabs  - world
+
+0e6: palette
+0e7: tileset  - world
+0e9: prefabs  - world
+
+0f1: sprites (raw, 16x16)
+0f2: sprites (raw, 16x16)
+0f4: sprites (raw, 32x32): plant monster
+0f7: sprites (raw, 16x16)
+0f8: sprites (unpacked, 16x16)
+0f9: sprites (unpacked, 16x16): flame
+0fa: sprites (raw, 16x16)
+0fb: sprites (raw, 16x16) bug
+0fc: sprites (unpacked, 16x16): switch
+0fd: sprites (unpacked, 16x16)
+0fe: sprites (raw, 16x16) shield door?
+100: sprites (unpacked, 16x16): pickup bag
+101: sprites (raw, 16x16)
+102: sprites (unpacked, 16x16)
+103: sprites (raw, 16x16)
+104: sprites (raw, 16x16)
+105: sprites (raw, 16x16)
+106: sprites (raw, 16x16) bomb
+
+10d: sprites (raw, 16x16)
+10e: sprites (raw, 32x32)?
+10f: sprites (raw, 16x16)
+
+111: sprites (raw, 32x32)?
+112: sprites (raw, 32x32)?
+114: sprites (raw, 32x??)
+11c: sprites (raw, 16x16)
+
+109..10c: palettes (16 colors)
+
+125..131: palettes (16 colors)
+
+135..13a: audio (xmi)
+
+157: sprites (raw, 8x8) Tileset?
+159: prefabs
+
+15b: level header - cutscene
+
+15d: level header - cutscene
+15e: level header - cutscene
+15f: level header - cutscene
+160: level header - cutscene
