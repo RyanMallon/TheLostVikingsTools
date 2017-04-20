@@ -132,7 +132,7 @@ static void load_palette_from_level(struct lv_pack *pack, SDL_Surface *surf,
     int i;
 
     /* Load level to get full palette */
-    level_info = lv_level_get_info(level_num);
+    level_info = lv_level_get_info(pack, level_num);
     if (!level_info) {
         printf("Bad level number\n");
         exit(EXIT_FAILURE);
