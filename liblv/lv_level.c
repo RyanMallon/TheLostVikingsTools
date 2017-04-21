@@ -751,7 +751,7 @@ static int load_bt_level(struct lv_pack *pack, struct lv_level *level,
     level->height = height;
     level->chunk_tileset = chunk_index_tileset;
 
-    load_map(pack, level, chunk_index_map);
+    load_map(pack, level, chunk_index_map + 1);
     lv_load_tile_prefabs(pack, &level->prefabs, &level->num_prefabs,
                          chunk_index_prefabs);
 

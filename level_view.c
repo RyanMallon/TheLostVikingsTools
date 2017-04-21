@@ -56,14 +56,6 @@ static const unsigned viking_pal_base[]    = {0xf0, 0xb0, 0xf0};
 static struct lv_pack pack;
 static struct lv_level level;
 
-static SDL_Surface *sdl_init(void)
-{
-    SDL_Init(SDL_INIT_VIDEO);
-    return SDL_SetVideoMode(640, 480, 8, (SDL_HWSURFACE |
-                                          SDL_HWPALETTE |
-                                          SDL_DOUBLEBUF));
-}
-
 static void draw_sprite32(struct lv_sprite_set *set, unsigned frame,
                           unsigned pal_base, SDL_Surface *dst,
                           unsigned x, unsigned y, unsigned flags)
@@ -526,7 +518,7 @@ int main(int argc, char **argv)
     else
         printf("    Level size:     %dx%d\n", level.width, level.height);
 
-    screen = sdl_init();
+    screen = sdl_init(640, 480);
 
     SDL_EnableKeyRepeat(250, 50);
 

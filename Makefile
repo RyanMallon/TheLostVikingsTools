@@ -32,7 +32,8 @@ level_view_objs :=	level_view.o		\
 
 sprite_view_objs :=	sprite_view.o
 
-tileset_view_objs :=	tileset_view.o
+tileset_view_objs :=	tileset_view.o		\
+			sdl_helpers.o
 
 all_objs :=		$(liblv_objs)		\
 			$(pack_tool_objs)	\

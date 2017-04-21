@@ -34,5 +34,6 @@ void sdl_vline(SDL_Surface *surf, unsigned x, unsigned y1,
 void sdl_hline(SDL_Surface *surf, unsigned x1, unsigned x2,
                unsigned y, unsigned color);
 void sdl_empty_box(SDL_Surface *surf, SDL_Rect *r, unsigned color);
+SDL_Surface *sdl_init(unsigned width, unsigned height);
 
 #endif /* _SDL_HELPERS_H */

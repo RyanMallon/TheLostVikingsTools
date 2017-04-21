@@ -26,6 +26,8 @@
 #include <liblv/lv_level.h>
 #include <liblv/common.h>
 
+#include "sdl_helpers.h"
+
 #define TILE_SIZE      8
 #define TILE_DATA_SIZE (TILE_SIZE * TILE_SIZE)
 
@@ -35,52 +37,81 @@
 #define SCREEN_WIDTH   ((PREFAB_SIZE + GAP) * 32)
 #define SCREEN_HEIGHT  ((PREFAB_SIZE + GAP) * 32)
 
+static SDL_Surface *screen;
 
-static void draw_tile(SDL_Surface *surf, const uint8_t *sprite_data,
+static struct lv_pack pack;
+static struct lv_level level;
+
+static void draw_tile(SDL_Surface *surf, SDL_Surface *surf_tileset,
                       unsigned tile, unsigned flags, unsigned x, unsigned y)
 {
-    bool flip_horiz, flip_vert;
+    SDL_Rect src_rect, dst_rect;
+    uint8_t base_color;
 
-    flip_horiz = !!(flags & LV_PREFAB_FLAG_FLIP_HORIZ);
-    flip_vert  = !!(flags & LV_PREFAB_FLAG_FLIP_VERT);
+    src_rect.x = tile * TILE_SIZE;
+    src_rect.y = 0;
+    src_rect.w = TILE_SIZE;
+    src_rect.h = TILE_SIZE;
 
-    lv_sprite_draw_raw(&sprite_data[TILE_DATA_SIZE * tile],
-                       TILE_SIZE, TILE_SIZE,
-                       flip_horiz, flip_vert, surf->pixels, x, y, surf->w);
+    dst_rect.x = x;
+    dst_rect.y = y;
+    dst_rect.w = TILE_SIZE;
+    dst_rect.h = TILE_SIZE;
+
+    /*
+     * The lower bits of the prefab flags specify which set of 16 color
+     * palette to use. This is only used by Blackthorne, the bits appear
+     * unused by The Lost Vikings.
+     */
+    base_color = (flags & LV_PREFAB_FLAG_COLOR_MASK) * 0x10;
+
+    sdl_blit(surf_tileset, &src_rect, surf, &dst_rect, base_color,
+             flags & LV_PREFAB_FLAG_FLIP_HORIZ,
+             flags & LV_PREFAB_FLAG_FLIP_VERT);
 }
 
-static void draw_prefab(SDL_Surface *surf, const uint8_t *sprite_data,
+static void draw_prefab(SDL_Surface *surf, SDL_Surface *surf_tileset,
                         struct lv_tile_prefab *prefab, unsigned x, unsigned y)
 {
-    draw_tile(surf, sprite_data, prefab->tile[0], prefab->flags[0], x, y);
-    draw_tile(surf, sprite_data, prefab->tile[1], prefab->flags[1], x + TILE_SIZE, y);
-    draw_tile(surf, sprite_data, prefab->tile[2], prefab->flags[2], x, y + TILE_SIZE);
-    draw_tile(surf, sprite_data, prefab->tile[3], prefab->flags[3], x + TILE_SIZE, y + TILE_SIZE);
+    draw_tile(surf, surf_tileset, prefab->tile[0], prefab->flags[0], x, y);
+    draw_tile(surf, surf_tileset, prefab->tile[1], prefab->flags[1]
+              , x + TILE_SIZE, y);
+    draw_tile(surf, surf_tileset, prefab->tile[2], prefab->flags[2],
+              x, y + TILE_SIZE);
+    draw_tile(surf, surf_tileset, prefab->tile[3], prefab->flags[3],
+              x + TILE_SIZE, y + TILE_SIZE);
 }
 
-static void load_palette_from_chunk(struct lv_pack *pack, SDL_Surface *surf,
-                                    unsigned chunk_index, bool uncompressed)
+static SDL_Surface *load_tileset(unsigned chunk_index)
 {
-    SDL_Color sdl_pal[256];
-    uint8_t *pal_data;
-    size_t pal_size;
+    SDL_Surface *surf;
     struct lv_chunk *chunk;
+    size_t num_tiles;
+    uint8_t *data, *pixels;
     int i;
 
-    chunk = lv_pack_get_chunk(pack, chunk_index);
-    if (uncompressed)
-        pal_data = chunk->data + 4;
-    else
-        lv_decompress_chunk(chunk, &pal_data);
-    pal_size = chunk->decompressed_size - 1;
+    chunk = lv_pack_get_chunk(&pack, chunk_index);
+    lv_decompress_chunk(chunk, &data);
 
-    for (i = 0; i < pal_size / 3; i++) {
-        sdl_pal[i].r = pal_data[(i * 3) + 0] << 2;
-        sdl_pal[i].g = pal_data[(i * 3) + 1] << 2;
-        sdl_pal[i].b = pal_data[(i * 3) + 2] << 2;
+    /* Tilesets are 8x8 */
+    num_tiles = chunk->decompressed_size / TILE_DATA_SIZE;
+
+    surf = sdl_create_surf(screen, num_tiles * TILE_SIZE, TILE_SIZE);
+    if (!surf) {
+        printf("Failed to create tile surface: %s\n", SDL_GetError());
+        exit(EXIT_FAILURE);
     }
 
-    SDL_SetPalette(surf, SDL_LOGPAL | SDL_PHYSPAL, sdl_pal, 0, pal_size / 3);
+    /* Render all the tiles in linear vga format on a single surface */
+    SDL_LockSurface(surf);
+    pixels = surf->pixels;
+    for (i = 0; i < num_tiles; i++)
+        lv_sprite_draw_raw(data + (i * TILE_DATA_SIZE), TILE_SIZE, TILE_SIZE,
+			   false, false, pixels, i * TILE_SIZE, 0, surf->w);
+    SDL_UnlockSurface(surf);
+
+    free(data);
+    return surf;
 }
 
 static void usage(const char *progname, int status)
@@ -104,20 +135,15 @@ int main(int argc, char **argv)
 {
     const struct option long_options[] = {
         {"blackthorne",   no_argument,       0, 'B'},
-        {"palette",       required_argument, 0, 'p'},
     };
-    const char *short_options = "Bp:";
-    SDL_Surface *screen;
-    struct lv_tile_prefab *prefabs;
-    size_t num_prefabs, screen_width = SCREEN_WIDTH,
-        screen_height = SCREEN_HEIGHT;
+    const char *short_options = "B";
+    SDL_Surface *surf_tileset;
+    size_t screen_width = SCREEN_WIDTH, screen_height = SCREEN_HEIGHT;
     bool blackthorne = false;
     char *pack_filename;
-    uint8_t *sprite_data;
-    struct lv_pack pack;
-    struct lv_chunk *chunk;
-    unsigned tileset_chunk_index, prefabs_chunk_index, i, x = 0, y = 0;
-    int c, option_index, pal_chunk_index = -1;
+    const struct lv_level_info *level_info;
+    unsigned level_num, i, x = 0, y = 0;
+    int c, option_index;
 
     while (1) {
         c = getopt_long(argc, argv, short_options, long_options, &option_index);
@@ -129,42 +155,39 @@ int main(int argc, char **argv)
             blackthorne = true;
             break;
 
-        case 'p':
-            pal_chunk_index = strtoul(optarg, NULL, 0);
-            break;
-
 	default:
             printf("Unknown argument '%c'\n", c);
             usage(argv[0], EXIT_FAILURE);
 	}
     }
 
-    if (optind == argc - 3) {
+    if (optind == argc - 2) {
         pack_filename = argv[optind++];
-        tileset_chunk_index = strtoul(argv[optind++], NULL, 0);
-        prefabs_chunk_index = strtoul(argv[optind++], NULL, 0);
+        level_num = strtoul(argv[optind++], NULL, 0);
     } else {
-        printf("No data file or chunks specified\n");
+        printf("No data file or level number specified\n");
         usage(argv[0], EXIT_FAILURE);
     }
 
     lv_pack_load(pack_filename, &pack, blackthorne);
 
-    /* Load the tileset sprite data */
-    chunk = lv_pack_get_chunk(&pack, tileset_chunk_index);
-    lv_decompress_chunk(chunk, &sprite_data);
+    level_info = lv_level_get_info(&pack, level_num);
+    if (!level_info) {
+        printf("Bad level number\n");
+        exit(EXIT_FAILURE);
+    }
+
+    lv_level_load(&pack, &level, level_info->chunk_level_header, 0xffff);
 
     /* Load the prefabs */
-    lv_load_tile_prefabs(&pack, &prefabs, &num_prefabs, prefabs_chunk_index);
-    printf("Loaded %zd prefabs\n", num_prefabs);
+    printf("Loaded %zd prefabs\n", level.num_prefabs);
 
-    screen = SDL_SetVideoMode(screen_width, screen_height, 8, SDL_INIT_VIDEO);
+    screen = sdl_init(screen_width, screen_height);
+    sdl_load_palette(screen, level.palette, 256);
+    surf_tileset = load_tileset(level.chunk_tileset);
 
-    if (pal_chunk_index >= 0)
-        load_palette_from_chunk(&pack, screen, pal_chunk_index, false);
-
-    for (i = 0; i < num_prefabs; i++) {
-        draw_prefab(screen, sprite_data, &prefabs[i], x, y);
+    for (i = 0; i < level.num_prefabs; i++) {
+        draw_prefab(screen, surf_tileset, &level.prefabs[i], x, y);
 
         x += PREFAB_SIZE + GAP;
         if (x > SCREEN_WIDTH - (PREFAB_SIZE + GAP)) {
@@ -177,5 +200,4 @@ int main(int argc, char **argv)
     getchar();
 
     exit(EXIT_SUCCESS);
-
 }

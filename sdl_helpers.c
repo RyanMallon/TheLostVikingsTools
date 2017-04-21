@@ -167,3 +167,11 @@ void sdl_empty_box(SDL_Surface *surf, SDL_Rect *r, unsigned color)
     sdl_hline(surf, r->x, r->x + r->w, r->y, color);
     sdl_hline(surf, r->x, r->x + r->w, r->y + r->h, color);
 }
+
+SDL_Surface *sdl_init(unsigned width, unsigned height)
+{
+    SDL_Init(SDL_INIT_VIDEO);
+    return SDL_SetVideoMode(width, height, 8, (SDL_HWSURFACE |
+                                               SDL_HWPALETTE |
+                                               SDL_DOUBLEBUF));
+}
