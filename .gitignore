@@ -1,0 +1,9 @@
+*.o
+liblv.a
+pack_tool
+sprite_view
+tileset_view
+level_view
+
+
+
