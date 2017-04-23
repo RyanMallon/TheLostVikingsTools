@@ -46,6 +46,7 @@
  * have transparency.
  *
  * \param sprite        Sprite data.
+ * \param base_color    Base color to add to each pixel value.
  * \param sprite_width  Sprite width.
  * \param sprite_height Sprite height.
  * \param flip_horiz    Draw horizontally flipped.
@@ -55,10 +56,10 @@
  * \param dst_y         Y offset to draw at on the destination surface.
  * \param dst_width     Width of the destination surface.
  */
-void lv_sprite_draw_raw(const uint8_t *sprite, size_t sprite_width,
-                        size_t sprite_height, bool flip_horiz, bool flip_vert,
-			uint8_t *dst, unsigned dst_x, unsigned dst_y,
-			size_t dst_width);
+void lv_sprite_draw_raw(const uint8_t *sprite, uint8_t base_color,
+			size_t sprite_width, size_t sprite_height,
+			bool flip_horiz, bool flip_vert, uint8_t *dst,
+			unsigned dst_x, unsigned dst_y, size_t dst_width);
 
 /**
  * Draw a packed 32x32 planar sprite onto a linear 8-bit surface. Packed

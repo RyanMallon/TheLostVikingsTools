@@ -83,7 +83,7 @@ static void sprite_layout_get_size(struct sprite_layout *layout,
 }
 
 static void draw_raw_multipart_sprites(SDL_Surface *surf, const uint8_t *data,
-                                       size_t data_size,
+                                       size_t data_size, unsigned pal_base,
                                        struct sprite_layout *layout)
 {
     size_t sprite_width, sprite_height, sprite_data_size, num_sprites;
@@ -101,7 +101,7 @@ static void draw_raw_multipart_sprites(SDL_Surface *surf, const uint8_t *data,
     num_sprites = data_size / sprite_data_size;
     for (i = 0; i < num_sprites; i++) {
         for (j = 0; j < layout->num_parts; j++) {
-            lv_sprite_draw_raw(&data[offset],
+            lv_sprite_draw_raw(&data[offset], pal_base,
                                layout->parts[j].width, layout->parts[j].height,
                                false, false, surf->pixels,
                                x + layout->parts[j].x, y + layout->parts[j].y,
@@ -121,15 +121,15 @@ static void draw_raw_multipart_sprites(SDL_Surface *surf, const uint8_t *data,
 }
 
 static void draw_raw_bt_large_sprites(SDL_Surface *surf, const uint8_t *data,
-                                      size_t data_size)
+                                      size_t data_size, unsigned pal_base)
 {
-    draw_raw_multipart_sprites(surf, data, data_size,
+    draw_raw_multipart_sprites(surf, data, data_size, pal_base,
                                &blackthorne_large_layout);
 }
 
 static void draw_raw_sprites(SDL_Surface *surf, const uint8_t *data,
-                             size_t data_size, size_t sprite_width,
-                             size_t sprite_height)
+                             size_t data_size, unsigned pal_base,
+                             size_t sprite_width, size_t sprite_height)
 {
     size_t sprite_size;
     unsigned offset;
@@ -144,7 +144,7 @@ static void draw_raw_sprites(SDL_Surface *surf, const uint8_t *data,
         if (offset + sprite_size > data_size)
             return;
 
-        lv_sprite_draw_raw(&data[offset], sprite_width, sprite_height,
+        lv_sprite_draw_raw(&data[offset], pal_base, sprite_width, sprite_height,
                            false, false, surf->pixels, x, y, surf->w);
 
         x += sprite_width;
@@ -292,7 +292,8 @@ static void usage(const char *progname, int status)
 }
 
 /*
- * Examples:
+ * Lost Vikings Examples
+ * ---------------------
  *
  * View tileset for level 1:
  *   ./sprite_view DATA.DAT 195 -l1 -fraw -w8 -h8
@@ -309,6 +310,14 @@ static void usage(const char *progname, int status)
  *
  * View Erik HUD image:
  *   ./sprite_view DATA.DAT 4 -l1 -fraw -w32 -h24
+ *
+ * Blackthorne Examples
+ * --------------------
+ *
+ * View player sprites:
+ *
+ *   ./sprite_view --blackthorne DATA.DAT -fraw-bt-large -l2 0x42 -b0x80
+ *
  */
 int main(int argc, char **argv)
 {
@@ -445,12 +454,12 @@ int main(int argc, char **argv)
 
     switch (format) {
     case FORMAT_RAW:
-        draw_raw_sprites(screen, sprite_data, data_size,
+        draw_raw_sprites(screen, sprite_data, data_size, pal_base,
                          sprite_width, sprite_height);
         break;
 
     case FORMAT_RAW_BT_LARGE:
-        draw_raw_bt_large_sprites(screen, sprite_data, data_size);
+        draw_raw_bt_large_sprites(screen, sprite_data, data_size, pal_base);
         break;
 
     case FORMAT_UNPACKED:
