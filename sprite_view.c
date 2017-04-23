@@ -31,14 +31,16 @@
 
 enum {
     FORMAT_RAW,
-    FORMAT_RAW_BT_LARGE,
+    FORMAT_RAW_BT_32x48,
+    FORMAT_RAW_BT_48x48,
     FORMAT_UNPACKED,
     FORMAT_PACKED32,
 };
 
 static const char *format_names[] = {
     [FORMAT_RAW]          = "raw",
-    [FORMAT_RAW_BT_LARGE] = "raw-bt-large",
+    [FORMAT_RAW_BT_32x48] = "raw-bt-32x48",
+    [FORMAT_RAW_BT_48x48] = "raw-bt-48x48",
     [FORMAT_UNPACKED]     = "unpacked",
     [FORMAT_PACKED32]     = "packed32",
 };
@@ -55,13 +57,25 @@ struct sprite_layout {
     size_t             num_parts;
 };
 
-static struct sprite_layout blackthorne_large_layout = {
+static struct sprite_layout blackthorne_32x48_layout = {
     .parts = {
         { 0,  0, 16, 16},
         {16,  0, 16, 16},
         { 0, 16, 32, 32},
     },
     .num_parts = 3,
+};
+
+static struct sprite_layout blackthorne_48x48_layout = {
+    .parts = {
+        { 0,  0, 16, 16},
+        {16,  0, 16, 16},
+        {32,  0, 16, 16},
+        { 0, 16, 32, 32},
+        {32, 16, 16, 16},
+        {32, 32, 16, 16},
+    },
+    .num_parts = 6,
 };
 
 static void sprite_layout_get_size(struct sprite_layout *layout,
@@ -118,13 +132,6 @@ static void draw_raw_multipart_sprites(SDL_Surface *surf, const uint8_t *data,
                 return;
         }
     }
-}
-
-static void draw_raw_bt_large_sprites(SDL_Surface *surf, const uint8_t *data,
-                                      size_t data_size, unsigned pal_base)
-{
-    draw_raw_multipart_sprites(surf, data, data_size, pal_base,
-                               &blackthorne_large_layout);
 }
 
 static void draw_raw_sprites(SDL_Surface *surf, const uint8_t *data,
@@ -458,8 +465,14 @@ int main(int argc, char **argv)
                          sprite_width, sprite_height);
         break;
 
-    case FORMAT_RAW_BT_LARGE:
-        draw_raw_bt_large_sprites(screen, sprite_data, data_size, pal_base);
+    case FORMAT_RAW_BT_32x48:
+        draw_raw_multipart_sprites(screen, sprite_data, data_size, pal_base,
+                                   &blackthorne_32x48_layout);
+        break;
+
+    case FORMAT_RAW_BT_48x48:
+        draw_raw_multipart_sprites(screen, sprite_data, data_size, pal_base,
+                                   &blackthorne_48x48_layout);
         break;
 
     case FORMAT_UNPACKED:
