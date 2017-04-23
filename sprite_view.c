@@ -26,14 +26,106 @@
 #include <liblv/lv_level.h>
 #include <liblv/common.h>
 
-#define SCREEN_WIDTH	(32 * 16)
-#define SCREEN_HEIGHT	(32 * 8)
+#define SCREEN_WIDTH	(64 * 16)
+#define SCREEN_HEIGHT	(48 * 16)
 
 enum {
     FORMAT_RAW,
+    FORMAT_RAW_BT_LARGE,
     FORMAT_UNPACKED,
     FORMAT_PACKED32,
 };
+
+static const char *format_names[] = {
+    [FORMAT_RAW]          = "raw",
+    [FORMAT_RAW_BT_LARGE] = "raw-bt-large",
+    [FORMAT_UNPACKED]     = "unpacked",
+    [FORMAT_PACKED32]     = "packed32",
+};
+
+struct sprite_part {
+    unsigned x;
+    unsigned y;
+    size_t   width;
+    size_t   height;
+};
+
+struct sprite_layout {
+    struct sprite_part parts[16];
+    size_t             num_parts;
+};
+
+static struct sprite_layout blackthorne_large_layout = {
+    .parts = {
+        { 0,  0, 16, 16},
+        {16,  0, 16, 16},
+        { 0, 16, 32, 32},
+    },
+    .num_parts = 3,
+};
+
+static void sprite_layout_get_size(struct sprite_layout *layout,
+                                   size_t *width, size_t *height,
+                                   size_t *data_size)
+{
+    int i;
+
+    *width     = 0;
+    *height    = 0;
+    *data_size = 0;
+
+    for (i = 0; i < layout->num_parts; i++) {
+        *width  = max(*width,  layout->parts[i].x + layout->parts[i].width);
+        *height = max(*height, layout->parts[i].y + layout->parts[i].height);
+
+        *data_size += layout->parts[i].width * layout->parts[i].height;
+    }
+}
+
+static void draw_raw_multipart_sprites(SDL_Surface *surf, const uint8_t *data,
+                                       size_t data_size,
+                                       struct sprite_layout *layout)
+{
+    size_t sprite_width, sprite_height, sprite_data_size, num_sprites;
+    unsigned offset;
+    int i, j, x, y;
+
+
+    sprite_layout_get_size(layout, &sprite_width, &sprite_height,
+                           &sprite_data_size);
+
+    offset = 0;
+    x = 0;
+    y = 0;
+
+    num_sprites = data_size / sprite_data_size;
+    for (i = 0; i < num_sprites; i++) {
+        for (j = 0; j < layout->num_parts; j++) {
+            lv_sprite_draw_raw(&data[offset],
+                               layout->parts[j].width, layout->parts[j].height,
+                               false, false, surf->pixels,
+                               x + layout->parts[j].x, y + layout->parts[j].y,
+                               surf->w);
+
+            offset += layout->parts[j].width * layout->parts[j].height;
+        }
+
+        x += sprite_width;
+        if (x > surf->w - sprite_width) {
+            x = 0;
+            y += sprite_height;
+            if (y >= surf->h)
+                return;
+        }
+    }
+}
+
+static void draw_raw_bt_large_sprites(SDL_Surface *surf, const uint8_t *data,
+                                      size_t data_size)
+{
+    draw_raw_multipart_sprites(surf, data, data_size,
+                               &blackthorne_large_layout);
+}
 
 static void draw_raw_sprites(SDL_Surface *surf, const uint8_t *data,
                              size_t data_size, size_t sprite_width,
@@ -176,10 +268,12 @@ static void load_palette_from_chunk(struct lv_pack *pack, SDL_Surface *surf,
 
 static void usage(const char *progname, int status)
 {
+    int i;
+
     printf("Usage: %s [OPTIONS...] FILE\n", progname);
     printf("\nOptions:\n");
     printf("  -B, --blackthorne           Pack file is Blackthorne format\n");
-    printf("  -f, --format=FORMAT         Sprite format (raw, unpacked, packed32)\n");
+    printf("  -f, --format=FORMAT         Sprite format\n");
     printf("  -p, --palette-chunk=INDEX   Use palette from chunk\n");
     printf("  -l, --level=LEVEL           Use palette data from level\n");
     printf("  -b, --palette-base=BASE     Base palette offset for packed32 sprites\n" );
@@ -190,6 +284,10 @@ static void usage(const char *progname, int status)
 
     printf("  -W, --screen-width=WIDTH    Screen width (default=%d)\n", SCREEN_WIDTH);
     printf("  -H, --screen-height=HEIGHT  Screen height (default=%d)\n", SCREEN_HEIGHT);
+
+    printf("\nFormats:\n");
+    for (i = 0; i < ARRAY_SIZE(format_names); i++)
+        printf("    %s\n", format_names[i]);
     exit(status);
 }
 
@@ -239,7 +337,7 @@ int main(int argc, char **argv)
     size_t sprite_width = 32, sprite_height = 32,
         screen_width = SCREEN_WIDTH, screen_height = SCREEN_HEIGHT, data_size;
     unsigned format = FORMAT_RAW, chunk_index, level_num = 0;
-    int c, option_index, pal_base = 0, pal_chunk_index = -1;
+    int c, i, option_index, pal_base = 0, pal_chunk_index = -1;
 
     while (1) {
         c = getopt_long(argc, argv, short_options, long_options, &option_index);
@@ -276,13 +374,13 @@ int main(int argc, char **argv)
             break;
 
         case 'f':
-            if (strcmp(optarg, "raw") == 0)
-                format = FORMAT_RAW;
-            else if (strcmp(optarg, "unpacked") == 0)
-                format = FORMAT_UNPACKED;
-            else if (strcmp(optarg, "packed32") == 0)
-                format = FORMAT_PACKED32;
-            else {
+            for (i = 0; i < ARRAY_SIZE(format_names); i++) {
+                if (strcmp(optarg, format_names[i]) == 0) {
+                    format = i;
+                    break;
+                }
+            }
+            if (i == ARRAY_SIZE(format_names)) {
                 printf("Bad format '%s'\n", optarg);
                 exit(EXIT_FAILURE);
             }
@@ -349,6 +447,10 @@ int main(int argc, char **argv)
     case FORMAT_RAW:
         draw_raw_sprites(screen, sprite_data, data_size,
                          sprite_width, sprite_height);
+        break;
+
+    case FORMAT_RAW_BT_LARGE:
+        draw_raw_bt_large_sprites(screen, sprite_data, data_size);
         break;
 
     case FORMAT_UNPACKED:
