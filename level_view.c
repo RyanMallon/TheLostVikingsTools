@@ -45,6 +45,7 @@ static SDL_Surface *screen;
 
 static bool draw_foreground   = true;
 static bool draw_background   = true;
+static bool draw_sky          = true;
 static bool draw_objects      = true;
 static bool draw_object_boxes = true;
 
@@ -253,11 +254,25 @@ static void draw_level(SDL_Surface *surf, SDL_Surface *surf_tileset)
 
     SDL_FillRect(surf, NULL, 0);
 
+    /* Draw background/sky map (Blackthorne only) */
+    if (draw_sky) {
+        for (y = 0; y < level.height; y++) {
+            for (x = 0; x < level.width; x++) {
+                prefab = lv_level_get_bg_prefab_at(&level, x, y, NULL, &flags);
+                if (prefab)
+                    draw_prefab(surf, surf_tileset, prefab,
+                                x * PREFAB_WIDTH, y * PREFAB_HEIGHT);
+            }
+        }
+    }
+
+    /* Draw foreground map */
     for (y = 0; y < level.height; y++) {
         for (x = 0; x < level.width; x++) {
-            prefab = lv_level_get_prefab_at(&level, x, y, &flags);
-            draw_prefab(surf, surf_tileset, prefab,
-                        x * PREFAB_WIDTH, y * PREFAB_HEIGHT);
+            prefab = lv_level_get_prefab_at(&level, x, y, NULL, &flags);
+            if (prefab)
+                draw_prefab(surf, surf_tileset, prefab,
+                            x * PREFAB_WIDTH, y * PREFAB_HEIGHT);
         }
     }
 
@@ -267,7 +282,7 @@ static void draw_level(SDL_Surface *surf, SDL_Surface *surf_tileset)
 
 static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
 {
-    unsigned xoff = 0, yoff = 0, tx, ty, flags;
+    unsigned xoff = 0, yoff = 0, tx, ty, tile, flags;
     int mouse_x = 0, mouse_y = 0, i;
     SDL_Rect rect;
     SDL_Event event;
@@ -311,6 +326,11 @@ static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
                     }
                     break;
 
+                case SDLK_s:
+                    draw_sky = !draw_sky;
+                    needs_redraw = true;
+                    break;
+
                 case SDLK_f:
                     draw_foreground = !draw_foreground;
                     needs_redraw = true;
@@ -349,10 +369,12 @@ static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
                     tx = (mouse_x + xoff) / PREFAB_WIDTH;
                     ty = (mouse_y + yoff) / PREFAB_HEIGHT;
 
-                    prefab = lv_level_get_prefab_at(&level, tx, ty, &flags);
+                    prefab = lv_level_get_prefab_at(&level, tx, ty,
+                                                    &tile, &flags);
 
-                    printf("Tile at %d, %d: %.4x, flags=%.2x\n", tx, ty,
-                           level.map[(ty * level.width) + tx], flags);
+                    printf("Tile at %d, %d: %.4x, tile=%.2x, flags=%.2x\n",
+                           tx, ty, level.map[(ty * level.width) + tx],
+                           tile, flags);
                     for (i = 0; i < 4; i++)
                         printf("  [%.2x]: %.4x: %.4x\n",
                                i, prefab->tile[i], prefab->flags[i]);

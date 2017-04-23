@@ -140,20 +140,21 @@ static int add_viking(struct lv_level *level, unsigned type,
 }
 
 static int load_map(struct lv_pack *pack, struct lv_level *level,
-                    unsigned chunk_index)
+                    unsigned chunk_index, uint16_t width, uint16_t height,
+                    uint16_t **map)
 {
     struct lv_chunk *chunk;
     uint8_t *data;
     size_t map_size;
 
-    map_size = level->width * level->height * sizeof(uint16_t);
+    map_size = width * height * sizeof(uint16_t);
 
     chunk = lv_pack_get_chunk(pack, chunk_index);
     if (chunk->decompressed_size != map_size)
         return -1;
 
     lv_decompress_chunk(chunk, &data);
-    level->map = (uint16_t *)data;
+    *map = (uint16_t *)data;
 
     return 0;
 }
@@ -237,6 +238,7 @@ static int load_lv_header(struct lv_pack *pack, struct lv_level *level,
      *   [2d] u16: Level map chunk index
      *   [2f] u16: Level tileset chunk index
      *   [31] u16: Level prefabs chunk index
+     *
      */
     lv_debug(LV_DEBUG_LEVEL, "Loading header:");
     buffer_seek(buf, 0x07);
@@ -268,7 +270,7 @@ static int load_lv_header(struct lv_pack *pack, struct lv_level *level,
     lv_debug(LV_DEBUG_LEVEL, "  Chunk tileset: %.4x", chunk_tileset);
     lv_debug(LV_DEBUG_LEVEL, "  Chunk prefabs: %.4x", chunk_prefabs);
 
-    load_map(pack, level, chunk_map);
+    load_map(pack, level, chunk_map, level->width, level->height, &level->map);
     lv_load_tile_prefabs(pack, &level->prefabs, &level->num_prefabs,
 			 chunk_prefabs);
 
@@ -711,12 +713,12 @@ static void load_something3(struct lv_pack *pack, struct lv_level *level,
 
 }
 
-
 static int load_bt_level(struct lv_pack *pack, struct lv_level *level,
                          struct buffer *buf)
 {
     uint16_t width, height, chunk_index_map, chunk_index_tileset,
-        chunk_index_prefabs;
+        chunk_index_prefabs, bg_width, bg_height, chunk_index_bg_map,
+        chunk_index_bg_tileset, chunk_index_bg_prefabs;
     uint8_t dummy;
 
     /*
@@ -741,6 +743,15 @@ static int load_bt_level(struct lv_pack *pack, struct lv_level *level,
     buffer_get_le16(buf, &chunk_index_tileset);
     buffer_get_le16(buf, &chunk_index_prefabs);
 
+    buffer_get_le16(buf, &bg_width);
+    buffer_get_le16(buf, &bg_height);
+    buffer_get_u8(buf, &dummy);
+    buffer_get_le16(buf, &chunk_index_bg_map);
+    buffer_get_le16(buf, &chunk_index_bg_tileset);
+    buffer_get_le16(buf, &chunk_index_bg_prefabs);
+
+    // FIXME - handle different background size and tileset/prefabs
+
     lv_debug(LV_DEBUG_LEVEL, "  Map size:      %dx%d (%dx%d rooms)",
              width, height, width / 16, height / 14);
     lv_debug(LV_DEBUG_LEVEL, "  Map chunk:     %3x", chunk_index_map);
@@ -751,7 +762,10 @@ static int load_bt_level(struct lv_pack *pack, struct lv_level *level,
     level->height = height;
     level->chunk_tileset = chunk_index_tileset;
 
-    load_map(pack, level, chunk_index_map + 1);
+    load_map(pack, level, chunk_index_map,
+             level->width, level->height, &level->map);
+    load_map(pack, level, chunk_index_bg_map,
+             level->width, level->height, &level->bg_map);
     lv_load_tile_prefabs(pack, &level->prefabs, &level->num_prefabs,
                          chunk_index_prefabs);
 

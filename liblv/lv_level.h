@@ -180,6 +180,9 @@ struct lv_level {
     /** The tile map. */
     uint16_t               *map;
 
+    /** Background tile map. Only used by Blackthorne */
+    uint16_t               *bg_map;
+
     /** Objects in the level. */
     struct lv_object       objects[100];
 
@@ -237,16 +240,41 @@ int lv_level_load(struct lv_pack *pack, struct lv_level *level,
  */
 static inline struct lv_tile_prefab *
 lv_level_get_prefab_at(struct lv_level *level, unsigned x, unsigned y,
-                       unsigned *flags)
+                       unsigned *r_tile, unsigned *r_flags)
 {
-    unsigned index;
+    unsigned index, flags, tile;
 
     index = level->map[(y * level->width) + x];
+    flags = (index >> LV_PREFAB_FLAGS_SHIFT) & LV_PREFAB_FLAGS_MASK;
+    tile  = index & 0x3ff;
 
-    if (flags)
-        *flags = (index >> LV_PREFAB_FLAGS_SHIFT) & LV_PREFAB_FLAGS_MASK;
+    if (r_flags)
+        *r_flags = flags;
+    if (r_tile)
+        *r_tile = tile;
 
-    return &level->prefabs[index & LV_PREFAB_INDEX_MASK];
+    return &level->prefabs[tile];
+}
+
+static inline struct lv_tile_prefab *
+lv_level_get_bg_prefab_at(struct lv_level *level, unsigned x, unsigned y,
+                          unsigned *r_tile, unsigned *r_flags)
+{
+    unsigned index, flags, tile;
+
+    if (!level->bg_map)
+        return NULL;
+
+    index = level->bg_map[(y * level->width) + x];
+    flags = (index >> LV_PREFAB_FLAGS_SHIFT) & LV_PREFAB_FLAGS_MASK;
+    tile  = index & 0x3ff;
+
+    if (r_flags)
+        *r_flags = flags;
+    if (r_tile)
+        *r_tile = tile;
+
+    return &level->prefabs[tile];
 }
 
 /**

@@ -88,10 +88,14 @@ void sdl_blit(SDL_Surface *src, SDL_Rect *src_rect,
 
         for (x = 0; x < src_rect->w; x++) {
             pixel = src_pixels[src_base + x] + base_color;
-            if (flip_horiz)
-                dst_pixels[dst_base + dst_rect->w - x - 1] = pixel;
-            else
-                dst_pixels[dst_base + x] = pixel;
+
+            // FIXME - is this a correct alpha color test?
+            if (pixel != base_color) {
+                if (flip_horiz)
+                    dst_pixels[dst_base + dst_rect->w - x - 1] = pixel;
+                else
+                    dst_pixels[dst_base + x] = pixel;
+            }
         }
     }
 }
