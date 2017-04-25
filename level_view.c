@@ -43,11 +43,12 @@
 
 static SDL_Surface *screen;
 
-static bool draw_foreground   = true;
-static bool draw_background   = true;
-static bool draw_sky          = true;
-static bool draw_objects      = true;
-static bool draw_object_boxes = true;
+static bool draw_foreground     = true;
+static bool draw_background     = true;
+static bool draw_sky            = true;
+static bool draw_objects        = true;
+static bool draw_object_boxes   = true;
+static bool draw_pal_animations = false;
 
 /* FIXME - hardcoded frames/palette offsets for the Vikings */
 static const unsigned viking_idle_frames[] = { 0, 49, 0};
@@ -56,6 +57,99 @@ static const unsigned viking_pal_base[]    = {0xf0, 0xb0, 0xf0};
 
 static struct lv_pack pack;
 static struct lv_level level;
+
+static void rgb555_to_sdl_color(uint16_t color, SDL_Color *sdl_color)
+{
+    sdl_color->r = ((color >> 10) & 0x1f) << 2;
+    sdl_color->g = ((color >>  5) & 0x1f) << 2;
+    sdl_color->b = ((color >>  0) & 0x1f) << 2;
+}
+
+static void set_pal_color(SDL_Surface *surf, SDL_Color *color, unsigned index)
+{
+    SDL_SetPalette(surf, SDL_LOGPAL | SDL_PHYSPAL, color, index, 1);
+}
+
+static void get_pal_color(struct lv_level *level, unsigned index,
+                          SDL_Color *color)
+{
+    color->r = level->palette[(index * 3) + 0] << 2;
+    color->g = level->palette[(index * 3) + 1] << 2;
+    color->b = level->palette[(index * 3) + 2] << 2;
+}
+
+static void update_palette_animation(SDL_Surface *surf, struct lv_level *level,
+                                     struct lv_pal_animation *anim)
+{
+    SDL_Color color;
+    size_t num_colors;
+    int i, target;
+
+    /*
+     * If the two color indexes for the the palette animation are equal then
+     * the animation is for a single color. A set of 16bit values encode the
+     * colors to cycle through in RGB-555 format.
+     *
+     * If the two color indexes are equal then rotate the colors between the
+     * upper and lower bound index.
+     */
+    if (anim->index1 == anim->index2) {
+        anim->current_value += 1;
+        anim->current_value %= anim->num_values;
+
+        rgb555_to_sdl_color(anim->values[anim->current_value], &color);
+        set_pal_color(surf, &color, anim->index1);
+
+    } else if (anim->index1 < anim->index2) {
+        num_colors = (anim->index2 - anim->index1) + 1;
+        anim->current_value = (anim->current_value + 1) % num_colors;
+
+        for (i = anim->index1; i <= anim->index2; i++) {
+            target = i - anim->current_value;
+            if (target < (int)anim->index1)
+                target += num_colors;
+
+            get_pal_color(level, target, &color);
+            set_pal_color(surf, &color, i);
+        }
+
+    } else {
+        num_colors = (anim->index1 - anim->index2) + 1;
+        anim->current_value = (anim->current_value + 1) % num_colors;
+
+        for (i = anim->index2; i <= anim->index1; i++) {
+            target = i - anim->current_value;
+            if (target < (int)anim->index2)
+                target += num_colors;
+
+            get_pal_color(level, target, &color);
+            set_pal_color(surf, &color, i);
+        }
+    }
+}
+
+static void update_palette_animations(SDL_Surface *surf, struct lv_level *level)
+{
+    static unsigned last_update = 0;
+    struct lv_pal_animation *anim;
+    int i;
+
+    if (last_update && SDL_GetTicks() - last_update < 50)
+        return;
+
+    last_update = SDL_GetTicks();
+
+    for (i = 0; i < level->num_pal_animations; i++) {
+        anim = &level->pal_animation[i];
+
+        if (anim->counter == 0) {
+            update_palette_animation(surf, level, anim);
+            anim->counter = anim->max_counter;
+        } else {
+            anim->counter--;
+        }
+    }
+}
 
 static void draw_sprite32(struct lv_sprite_set *set, unsigned frame,
                           unsigned pal_base, SDL_Surface *dst,
@@ -356,6 +450,10 @@ static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
                     needs_redraw = true;
                     break;
 
+                case SDLK_a:
+                    draw_pal_animations = !draw_pal_animations;
+                    break;
+
                 default:
                     break;
                 }
@@ -410,6 +508,9 @@ static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
                 }
             }
         }
+
+        if (draw_pal_animations)
+            update_palette_animations(screen, &level);
 
         if (needs_redraw) {
             rect.x = xoff;
