@@ -148,6 +148,16 @@ struct lv_object {
     struct lv_object_db_entry db_entry;
 };
 
+struct lv_pal_animation {
+    unsigned               max_counter;
+    unsigned               counter;
+    unsigned               index1;
+    unsigned               index2;
+    uint16_t               values[16];
+    unsigned               num_values;
+    unsigned               current_value;
+};
+
 /**
  * A single level. Special levels are used for the company logos, world warp
  * screen, death screen, etc.
@@ -170,6 +180,10 @@ struct lv_level {
 
     /** Palette. */
     uint8_t                palette[256 * 3];
+
+    unsigned                pal_animation_flags;
+    struct lv_pal_animation pal_animation[16];
+    size_t                  num_pal_animations;
 
     /** Tile prefabs. */
     struct lv_tile_prefab  *prefabs;

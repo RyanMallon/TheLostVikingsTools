@@ -413,39 +413,60 @@ static int load_palette(struct lv_pack *pack, struct lv_level *level,
 static int load_palette_animations(struct lv_pack *pack, struct lv_level *level,
                                    struct buffer *buf)
 {
-    uint8_t a, b, c;
-    uint16_t val;
+    struct lv_pal_animation *anim;
+    uint8_t counter, index1, index2;
+    uint16_t flags, val;
+    int i, j;
 
     /*
-     * Header: u16 - unknown
+     * Header:
+     *   [00]     u16: Flags
      *
      * Entries are 3 byte header, plus n u16 values:
-     *   [00]: u8 - 0x00 ends
-     *   [01]: u8
-     *   [02]: u8
-     *   [03]: u16 * n - 0xffff ends
+     *   [00]:     u8: Count down start - 0x00 ends
+     *   [01]:     u8: First color index
+     *   [02]:     u8: Second color index
+     *   [03]: u16[n]: Animation values - 0xffff ends
      *
      * Maximum 8 entries
      */
-    buffer_get_le16(buf, &val);
-    lv_debug(LV_DEBUG_LEVEL, "Loading palette animations: header=%.4x", val);
-    while (1) {
-        buffer_get_u8(buf, &a);
-        if (a == 0x00)
+    buffer_get_le16(buf, &flags);
+    lv_debug(LV_DEBUG_LEVEL, "Loading palette animations: flags=%.4x", flags);
+
+    level->pal_animation_flags = flags;
+    level->num_pal_animations  = 0;
+
+    for (i = 0; i < ARRAY_SIZE(level->pal_animation); i++) {
+        anim = &level->pal_animation[i];
+
+        buffer_get_u8(buf, &counter);
+        if (counter == 0x00)
             break;
 
-        buffer_get_u8(buf, &b);
-        buffer_get_u8(buf, &c);
+        buffer_get_u8(buf, &index1);
+        buffer_get_u8(buf, &index2);
 
-        lv_debug(LV_DEBUG_LEVEL, "  %.2x [%.2x:%.2x]", a, b, c);
+        anim->max_counter = counter;
+        anim->index1 = index1;
+        anim->index2 = index2;
 
-        while (1) {
+        lv_debug(LV_DEBUG_LEVEL, "  counter=%.2x, index=%.2x:%.2x",
+                 counter, index1, index2);
+
+        // FIXME - maximum?
+        anim->num_values = 0;
+        for (j = 0; ; j++) {
             buffer_get_le16(buf, &val);
             if (val == 0xffff)
                 break;
 
+            anim->values[j] = val;
+            anim->num_values++;
+
             lv_debug(LV_DEBUG_LEVEL, "    %.4x", val);
         }
+
+        level->num_pal_animations++;
     }
 
     return 0;
