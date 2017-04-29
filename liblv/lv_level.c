@@ -670,7 +670,7 @@ static void load_something(struct lv_pack *pack, struct lv_level *level,
      *   [02]  u8:
      *   [03]  u8:
      *   [04] u16:
-     *   [06] u16:
+     *   [06] u16: chunk index?
      */
     buffer_get_le16(buf, &header);
     lv_debug(LV_DEBUG_LEVEL, "Loading something: header=%.4x", header);
@@ -688,25 +688,37 @@ static void load_something(struct lv_pack *pack, struct lv_level *level,
     }
 }
 
-static void load_something2(struct lv_pack *pack, struct lv_level *level,
+static void load_level_exit(struct lv_pack *pack, struct lv_level *level,
                             struct buffer *buf)
 {
-    uint8_t a, b[9];
+    uint8_t x1, y1, x2, y2;
+    uint16_t field0, field1, field2;
 
     /*
      * Entries are 10 bytes:
-     *   [00]  u8: unknown - 0xff ends
-     *   ....      unknown
+     *   [00]   u8: x offset? - 0xff ends
+     *   [01]   u8: y offset?
+     *   [02]   u8: x offset?
+     *   [03]   u8: y offset?
+     *   [04]  u16: next level header chunk index
+     *   [06]  u16: level info field 1
+     *   [08]  u16: level info field 2
      */
-    lv_debug(LV_DEBUG_LEVEL, "Loading something2");
+    lv_debug(LV_DEBUG_LEVEL, "Loading level exit info:");
     while (1) {
-        buffer_get_u8(buf, &a);
-        if (a == 0xff)
+        buffer_get_u8(buf, &x1);
+        if (x1 == 0xff)
             break;
-        buffer_get(buf, b, sizeof(b));
+        buffer_get_u8(buf, &y1);
+        buffer_get_u8(buf, &x2);
+        buffer_get_u8(buf, &y2);
+        buffer_get_le16(buf, &field0);
+        buffer_get_le16(buf, &field1);
+        buffer_get_le16(buf, &field2);
+
         lv_debug(LV_DEBUG_LEVEL,
-                 "  %.2x: %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x",
-                 a, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9]);
+                 "  (%.2x, %.2x)-(%.2x, %.2x) %.4x %.4x %.4x",
+                 x1, y1, x2, y2, field0, field1, field2);
     }
 }
 
@@ -743,6 +755,8 @@ static int load_bt_level(struct lv_pack *pack, struct lv_level *level,
     uint8_t dummy;
 
     /*
+     * [08]  u8: flags: bit1=load hud items
+     *
      * [1c] u16: Level width (tiles)
      * [1e] u16: Level height (tiles)
      * [20]  u8: Unknown
@@ -773,20 +787,27 @@ static int load_bt_level(struct lv_pack *pack, struct lv_level *level,
 
     // FIXME - handle different background size and tileset/prefabs
 
-    lv_debug(LV_DEBUG_LEVEL, "  Map size:      %dx%d (%dx%d rooms)",
+    lv_debug(LV_DEBUG_LEVEL, "  Map size:         %dx%d (%dx%d rooms)",
              width, height, width / 16, height / 14);
-    lv_debug(LV_DEBUG_LEVEL, "  Map chunk:     %3x", chunk_index_map);
-    lv_debug(LV_DEBUG_LEVEL, "  Tileset chunk: %3x", chunk_index_tileset);
-    lv_debug(LV_DEBUG_LEVEL, "  Prefabs chunk: %3x", chunk_index_prefabs);
+    lv_debug(LV_DEBUG_LEVEL, "  Map chunk:        %3x", chunk_index_map);
+    lv_debug(LV_DEBUG_LEVEL, "  Tileset chunk:    %3x", chunk_index_tileset);
+    lv_debug(LV_DEBUG_LEVEL, "  Prefabs chunk:    %3x", chunk_index_prefabs);
+
+    lv_debug(LV_DEBUG_LEVEL, "  BG map chunk:     %3x", chunk_index_bg_map);
+    lv_debug(LV_DEBUG_LEVEL, "  BG tileset chunk: %3x", chunk_index_bg_tileset);
+    lv_debug(LV_DEBUG_LEVEL, "  BG prefabs chunk: %3x", chunk_index_bg_prefabs);
 
     level->width = width;
     level->height = height;
     level->chunk_tileset = chunk_index_tileset;
 
+    /* Load the main and optional background maps */
     load_map(pack, level, chunk_index_map,
              level->width, level->height, &level->map);
-    load_map(pack, level, chunk_index_bg_map,
-             level->width, level->height, &level->bg_map);
+    if (chunk_index_bg_map != 0xffff)
+        load_map(pack, level, chunk_index_bg_map,
+                 level->width, level->height, &level->bg_map);
+
     lv_load_tile_prefabs(pack, &level->prefabs, &level->num_prefabs,
                          chunk_index_prefabs);
 
@@ -797,7 +818,7 @@ static int load_bt_level(struct lv_pack *pack, struct lv_level *level,
     load_something(pack, level, buf);
     load_unpacked_sprite_sets(pack, level, buf);
     load_raw_sprite_sets(pack, level, buf);
-    load_something2(pack, level, buf);
+    load_level_exit(pack, level, buf);
     load_something3(pack, level, buf);
 
     return 0;
