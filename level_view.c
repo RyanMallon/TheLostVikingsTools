@@ -43,12 +43,13 @@
 
 static SDL_Surface *screen;
 
-static bool draw_foreground     = true;
-static bool draw_background     = true;
-static bool draw_sky            = true;
-static bool draw_objects        = true;
-static bool draw_object_boxes   = true;
-static bool draw_pal_animations = false;
+static bool draw_foreground_layer = true;
+static bool draw_foreground       = true;
+static bool draw_background       = true;
+static bool draw_sky              = true;
+static bool draw_objects          = true;
+static bool draw_object_boxes     = true;
+static bool draw_pal_animations   = false;
 
 /* FIXME - hardcoded frames/palette offsets for the Vikings */
 static const unsigned viking_idle_frames[] = { 0, 49, 0};
@@ -361,12 +362,14 @@ static void draw_level(SDL_Surface *surf, SDL_Surface *surf_tileset)
     }
 
     /* Draw foreground map */
-    for (y = 0; y < level.height; y++) {
-        for (x = 0; x < level.width; x++) {
-            prefab = lv_level_get_prefab_at(&level, x, y, NULL, &flags);
-            if (prefab)
-                draw_prefab(surf, surf_tileset, prefab,
-                            x * PREFAB_WIDTH, y * PREFAB_HEIGHT);
+    if (draw_foreground_layer) {
+        for (y = 0; y < level.height; y++) {
+            for (x = 0; x < level.width; x++) {
+                prefab = lv_level_get_prefab_at(&level, x, y, NULL, &flags);
+                if (prefab)
+                    draw_prefab(surf, surf_tileset, prefab,
+                                x * PREFAB_WIDTH, y * PREFAB_HEIGHT);
+            }
         }
     }
 
@@ -422,6 +425,11 @@ static void main_loop(SDL_Surface *surf_map, SDL_Surface *surf_tileset)
 
                 case SDLK_s:
                     draw_sky = !draw_sky;
+                    needs_redraw = true;
+                    break;
+
+                case SDLK_l:
+                    draw_foreground_layer = !draw_foreground_layer;
                     needs_redraw = true;
                     break;
 
