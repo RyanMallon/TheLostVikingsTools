@@ -90,12 +90,12 @@ void lv_sprite_draw_packed32(const uint8_t *sprite, uint8_t base_color,
     }
 }
 
-void lv_sprite_draw_unpacked(const uint8_t *sprite,
+void lv_sprite_draw_unpacked(const uint8_t *sprite, uint8_t base_color,
 			     size_t sprite_width, size_t sprite_height,
-			     bool flip, uint8_t *dst,
+			     bool flip_horiz, bool flip_vert, uint8_t *dst,
 			     unsigned dst_x, unsigned dst_y, size_t dst_width)
 {
-    int plane, i, x, y, rx, bit;
+    int plane, i, x, y, rx, ry, bit;
     uint8_t mask, pixel;
 
     x = 0;
@@ -105,15 +105,19 @@ void lv_sprite_draw_unpacked(const uint8_t *sprite,
         for (i = 0; i < (sprite_width * sprite_height) / 4 / 8; i++) {
             mask = *sprite++;
             for (bit = 7; bit >= 0; bit--) {
-                pixel = *sprite++;
+                pixel = (*sprite++) + base_color;
 
-                if (flip)
+                if (flip_horiz)
                     rx = sprite_width - x;
                 else
                     rx = x;
+                if (flip_vert)
+                    ry = sprite_height - y;
+                else
+                    ry = y;
 
                 if (mask & (1 << bit))
-                    dst[((dst_y + y) * dst_width) + (dst_x + rx)] = pixel;
+                    dst[((dst_y + ry) * dst_width) + (dst_x + rx)] = pixel;
 
                 x += 4;
                 if (x >= sprite_width) {

@@ -261,7 +261,7 @@ static void draw_unpacked_sprite(SDL_Surface *surf, uint8_t *sprite,
     x = 0;
     y = 0;
     for (i = 0; i < num_tiles; i++) {
-        lv_sprite_draw_unpacked(sprite, tile_size, tile_size, flip,
+        lv_sprite_draw_unpacked(sprite, 0, tile_size, tile_size, flip, false,
 				surf->pixels, rect->x + x, rect->y + y,
 				surf->w);
 

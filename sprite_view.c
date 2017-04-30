@@ -223,8 +223,8 @@ static void draw_unpacked_sprites(SDL_Surface *surf, const uint8_t *data,
         if (offset >= data_size)
             break;
 
-        lv_sprite_draw_unpacked(&data[offset], sprite_width, sprite_height,
-                                false, surf->pixels, x, y, surf->w);
+        lv_sprite_draw_unpacked(&data[offset], 0, sprite_width, sprite_height,
+                                false, false, surf->pixels, x, y, surf->w);
 
         x += sprite_width;
         if (x > surf->w - sprite_width) {

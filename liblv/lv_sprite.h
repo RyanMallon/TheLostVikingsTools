@@ -88,17 +88,19 @@ void lv_sprite_draw_packed32(const uint8_t *sprite, uint8_t base_color,
  * may use the full 256 color range. Transparent pixels are not drawn.
  *
  * \param sprite        Sprite data.
+ * \param base_color    Base color to add to each pixel value.
  * \param sprite_width  Sprite width.
  * \param sprite_height Sprite height.
- * \param flip          Set to draw the sprite flipped horizontally.
+ * \param flip_horiz    Draw horizontally flipped.
+ * \param flip_vert     Draw vertically flipped.
  * \param dst           Destination 8-bit surface.
  * \param dst_x         X offset to draw at on the destination surface.
  * \param dst_y         Y offset to draw at on the destination surface.
  * \param dst_width     Width of the destination surface.
  */
-void lv_sprite_draw_unpacked(const uint8_t *sprite,
+void lv_sprite_draw_unpacked(const uint8_t *sprite, uint8_t base_color,
                              size_t sprite_width, size_t sprite_height,
-                             bool flip, uint8_t *dst,
+                             bool flip_horiz, bool flip_vert, uint8_t *dst,
                              unsigned dst_x, unsigned dst_y, size_t dst_width);
 
 /**
