@@ -283,8 +283,9 @@ int main(int argc, char **argv)
         for (i = 0; i < pack.num_chunks; i++) {
             chunk = &pack.chunks[i];
 
-            printf("  [%.4d] start=%.6x, size=%.4zx, decompressed_size=%.4zx\n",
-                   i, chunk->start, chunk->size, chunk->decompressed_size);
+            printf("  [%4x] start=%6x, size=%6zx, decompressed_size=%6zx, flag=%d\n",
+                   i, chunk->start, chunk->size, chunk->decompressed_size,
+                   chunk->flag);
         }
     }
 

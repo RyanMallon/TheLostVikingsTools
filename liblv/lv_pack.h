@@ -49,6 +49,9 @@ struct lv_chunk {
     /** Size of the chunk data as it appears in the data file. */
     size_t           size;
 
+    /** Unknown flag used by Blackthorne. */
+    bool             flag;
+
     /**
      * Decompressed size of the chunk. For non-compressed chunks this value
      * is not used.

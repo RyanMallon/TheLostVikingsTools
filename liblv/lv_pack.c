@@ -80,7 +80,10 @@ int lv_pack_load(const char *filename, struct lv_pack *pack, bool blackthorne)
              * Some blackthorne chunks have a flag set in the upper bits
              * of the chunk offset. Its use it not yet known. Clear it.
              */
-            pack->chunks[i].start &= ~BT_CHUNK_FLAG;
+            if (pack->chunks[i].start & BT_CHUNK_FLAG) {
+                pack->chunks[i].flag = true;
+                pack->chunks[i].start &= ~BT_CHUNK_FLAG;
+            }
         }
     }
 
