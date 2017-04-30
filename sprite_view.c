@@ -33,6 +33,7 @@ enum {
     FORMAT_RAW,
     FORMAT_RAW_BT_32x48,
     FORMAT_RAW_BT_48x48,
+    FORMAT_RAW_BT_48x64,
     FORMAT_UNPACKED,
     FORMAT_PACKED32,
 };
@@ -41,6 +42,7 @@ static const char *format_names[] = {
     [FORMAT_RAW]          = "raw",
     [FORMAT_RAW_BT_32x48] = "raw-bt-32x48",
     [FORMAT_RAW_BT_48x48] = "raw-bt-48x48",
+    [FORMAT_RAW_BT_48x64] = "raw-bt-48x64",
     [FORMAT_UNPACKED]     = "unpacked",
     [FORMAT_PACKED32]     = "packed32",
 };
@@ -74,6 +76,18 @@ static struct sprite_layout blackthorne_48x48_layout = {
         { 0, 16, 32, 32},
         {32, 16, 16, 16},
         {32, 32, 16, 16},
+    },
+    .num_parts = 6,
+};
+
+static struct sprite_layout blackthorne_48x64_layout = {
+    .parts = {
+        { 0,  0, 32, 32},
+        {32,  0, 16, 16},
+        {32, 16, 16, 16},
+        { 0, 32, 32, 32},
+        {32, 32, 16, 16},
+        {32, 48, 16, 16},
     },
     .num_parts = 6,
 };
@@ -473,6 +487,11 @@ int main(int argc, char **argv)
     case FORMAT_RAW_BT_48x48:
         draw_raw_multipart_sprites(screen, sprite_data, data_size, pal_base,
                                    &blackthorne_48x48_layout);
+        break;
+
+    case FORMAT_RAW_BT_48x64:
+        draw_raw_multipart_sprites(screen, sprite_data, data_size, pal_base,
+                                   &blackthorne_48x64_layout);
         break;
 
     case FORMAT_UNPACKED:
