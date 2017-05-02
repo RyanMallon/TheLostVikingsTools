@@ -54,10 +54,6 @@
 #define LV_OBJ_FLAG_FLIP_HORIZ   0x0040
 #define LV_OBJ_FLAG_NO_DRAW      0x0800
 
-/* Sprite formats */
-#define LV_SPRITE_FORMAT_PACKED   1
-#define LV_SPRITE_FORMAT_UNPACKED 2
-
 struct lv_pack;
 
 /**
@@ -85,31 +81,6 @@ struct lv_tile_prefab {
 
     /** Flags for each component tile of the prefab. */
     uint8_t                flags[4];
-};
-
-/**
- * A set of sprites. Sprites may be stored in a number of different formats
- * (see \ref lv_sprite). The size of the sprites is managed by the object
- * referring to the sprite set.
- */
-struct lv_sprite_set {
-    /** The chunk this set of sprites is from. */
-    unsigned               chunk_index;
-
-    /** Original planar data from the data file chunk. */
-    uint8_t                *planar_data;
-
-    /** Size of the planar data. */
-    size_t                 data_size;
-
-    /** Sprite format. */
-    unsigned               format;
-
-    /** Pointers to the start of each sprite in the set. */
-    uint8_t                *sprites[128];
-
-    /** Number of sprites in the set. */
-    size_t                 num_sprites;
 };
 
 /** An object in the level. */

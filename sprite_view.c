@@ -29,212 +29,11 @@
 #define SCREEN_WIDTH	(64 * 16)
 #define SCREEN_HEIGHT	(48 * 16)
 
-enum {
-    FORMAT_RAW,
-    FORMAT_RAW_BT_32x48,
-    FORMAT_RAW_BT_48x48,
-    FORMAT_RAW_BT_48x64,
-    FORMAT_UNPACKED,
-    FORMAT_PACKED32,
-};
-
 static const char *format_names[] = {
-    [FORMAT_RAW]          = "raw",
-    [FORMAT_RAW_BT_32x48] = "raw-bt-32x48",
-    [FORMAT_RAW_BT_48x48] = "raw-bt-48x48",
-    [FORMAT_RAW_BT_48x64] = "raw-bt-48x64",
-    [FORMAT_UNPACKED]     = "unpacked",
-    [FORMAT_PACKED32]     = "packed32",
+    [LV_SPRITE_FORMAT_RAW]      = "raw",
+    [LV_SPRITE_FORMAT_UNPACKED] = "unpacked",
+    [LV_SPRITE_FORMAT_PACKED32] = "packed32",
 };
-
-struct sprite_part {
-    unsigned x;
-    unsigned y;
-    size_t   width;
-    size_t   height;
-};
-
-struct sprite_layout {
-    struct sprite_part parts[16];
-    size_t             num_parts;
-};
-
-static struct sprite_layout blackthorne_32x48_layout = {
-    .parts = {
-        { 0,  0, 16, 16},
-        {16,  0, 16, 16},
-        { 0, 16, 32, 32},
-    },
-    .num_parts = 3,
-};
-
-static struct sprite_layout blackthorne_48x48_layout = {
-    .parts = {
-        { 0,  0, 16, 16},
-        {16,  0, 16, 16},
-        {32,  0, 16, 16},
-        { 0, 16, 32, 32},
-        {32, 16, 16, 16},
-        {32, 32, 16, 16},
-    },
-    .num_parts = 6,
-};
-
-static struct sprite_layout blackthorne_48x64_layout = {
-    .parts = {
-        { 0,  0, 32, 32},
-        {32,  0, 16, 16},
-        {32, 16, 16, 16},
-        { 0, 32, 32, 32},
-        {32, 32, 16, 16},
-        {32, 48, 16, 16},
-    },
-    .num_parts = 6,
-};
-
-static void sprite_layout_get_size(struct sprite_layout *layout,
-                                   size_t *width, size_t *height,
-                                   size_t *data_size)
-{
-    int i;
-
-    *width     = 0;
-    *height    = 0;
-    *data_size = 0;
-
-    for (i = 0; i < layout->num_parts; i++) {
-        *width  = max(*width,  layout->parts[i].x + layout->parts[i].width);
-        *height = max(*height, layout->parts[i].y + layout->parts[i].height);
-
-        *data_size += layout->parts[i].width * layout->parts[i].height;
-    }
-}
-
-static void draw_raw_multipart_sprites(SDL_Surface *surf, const uint8_t *data,
-                                       size_t data_size, unsigned pal_base,
-                                       struct sprite_layout *layout)
-{
-    size_t sprite_width, sprite_height, sprite_data_size, num_sprites;
-    unsigned offset;
-    int i, j, x, y;
-
-
-    sprite_layout_get_size(layout, &sprite_width, &sprite_height,
-                           &sprite_data_size);
-
-    offset = 0;
-    x = 0;
-    y = 0;
-
-    num_sprites = data_size / sprite_data_size;
-    for (i = 0; i < num_sprites; i++) {
-        for (j = 0; j < layout->num_parts; j++) {
-            lv_sprite_draw_raw(&data[offset], pal_base,
-                               layout->parts[j].width, layout->parts[j].height,
-                               false, false, surf->pixels,
-                               x + layout->parts[j].x, y + layout->parts[j].y,
-                               surf->w);
-
-            offset += layout->parts[j].width * layout->parts[j].height;
-        }
-
-        x += sprite_width;
-        if (x > surf->w - sprite_width) {
-            x = 0;
-            y += sprite_height;
-            if (y >= surf->h)
-                return;
-        }
-    }
-}
-
-static void draw_raw_sprites(SDL_Surface *surf, const uint8_t *data,
-                             size_t data_size, unsigned pal_base,
-                             size_t sprite_width, size_t sprite_height)
-{
-    size_t sprite_size;
-    unsigned offset;
-    int i, x, y;
-
-    sprite_size = sprite_width * sprite_height;
-
-    x = 0;
-    y = 0;
-    for (i = 0; ;i++) {
-        offset = i * sprite_size;
-        if (offset + sprite_size > data_size)
-            return;
-
-        lv_sprite_draw_raw(&data[offset], pal_base, sprite_width, sprite_height,
-                           false, false, surf->pixels, x, y, surf->w);
-
-        x += sprite_width;
-        if (x > surf->w - sprite_width) {
-            x = 0;
-            y += sprite_height;
-            if (y >= surf->h)
-                return;
-        }
-    }
-}
-
-static void draw_packed32_sprites(SDL_Surface *surf, const uint8_t *data,
-                                  size_t data_size, unsigned pal_base)
-{
-    uint16_t offset;
-    int i, x, y;
-
-    x = 0;
-    y = 0;
-    for (i = 0; ; i++) {
-        /* Past the offset of the first sprite data? */
-        if (i * 2 >= *(uint16_t *)(&data[0]))
-            break;
-
-        offset = *(uint16_t *)(&data[i * 2]);
-
-        lv_sprite_draw_packed32(&data[offset], pal_base, false,
-                                surf->pixels, x, y, surf->w);
-
-        x += 32;
-        if (x > surf->w - 32) {
-            x = 0;
-            y += 32;
-            if (y >= surf->h)
-                return;
-        }
-    }
-}
-
-static void draw_unpacked_sprites(SDL_Surface *surf, const uint8_t *data,
-                                  size_t data_size, size_t sprite_width,
-                                  size_t sprite_height)
-{
-    size_t unpacked_size;
-    unsigned offset;
-    int i, x, y;
-
-    unpacked_size = lv_sprite_unpacked_data_size(sprite_width, sprite_height);
-
-    x = 0;
-    y = 0;
-    for (i = 0; ; i++) {
-        offset = i * unpacked_size;
-        if (offset >= data_size)
-            break;
-
-        lv_sprite_draw_unpacked(&data[offset], 0, sprite_width, sprite_height,
-                                false, false, surf->pixels, x, y, surf->w);
-
-        x += sprite_width;
-        if (x > surf->w - sprite_width) {
-            x = 0;
-            y += sprite_height;
-            if (y >= surf->h)
-                return;
-        }
-    }
-}
 
 static void load_palette_from_level(struct lv_pack *pack, SDL_Surface *surf,
                                     unsigned level_num)
@@ -337,7 +136,7 @@ static void usage(const char *progname, int status)
  *
  * View player sprites:
  *
- *   ./sprite_view --blackthorne DATA.DAT -fraw-bt-large -l2 0x42 -b0x80
+ *   ./sprite_view --blackthorne DATA.DAT -fraw -w32 -h48 -l2 0x42 -b0x80
  *
  */
 int main(int argc, char **argv)
@@ -363,10 +162,11 @@ int main(int argc, char **argv)
     uint8_t *sprite_data;
     struct lv_pack pack;
     struct lv_chunk *chunk;
+    struct lv_sprite_set sprite_set;
     bool blackthorne = false, uncompressed = false, splash = false;
     size_t sprite_width = 32, sprite_height = 32,
         screen_width = SCREEN_WIDTH, screen_height = SCREEN_HEIGHT, data_size;
-    unsigned format = FORMAT_RAW, chunk_index, level_num = 0;
+    unsigned format = LV_SPRITE_FORMAT_RAW, chunk_index, level_num = 0, x, y;
     int c, i, option_index, pal_base = 0, pal_chunk_index = -1;
 
     while (1) {
@@ -473,35 +273,20 @@ int main(int argc, char **argv)
         data_size *= 4;
     }
 
-    switch (format) {
-    case FORMAT_RAW:
-        draw_raw_sprites(screen, sprite_data, data_size, pal_base,
-                         sprite_width, sprite_height);
-        break;
+    lv_sprite_load_set(&sprite_set, format, sprite_width, sprite_height, chunk);
+    printf("%zd sprites\n", sprite_set.num_sprites);
+    for (i = 0, x = 0, y = 0; i < sprite_set.num_sprites; i++) {
+        lv_sprite_draw(sprite_set.sprites[i],
+                       sprite_width, sprite_height, format,
+                       pal_base, false, false, screen->pixels, x, y, screen->w);
 
-    case FORMAT_RAW_BT_32x48:
-        draw_raw_multipart_sprites(screen, sprite_data, data_size, pal_base,
-                                   &blackthorne_32x48_layout);
-        break;
-
-    case FORMAT_RAW_BT_48x48:
-        draw_raw_multipart_sprites(screen, sprite_data, data_size, pal_base,
-                                   &blackthorne_48x48_layout);
-        break;
-
-    case FORMAT_RAW_BT_48x64:
-        draw_raw_multipart_sprites(screen, sprite_data, data_size, pal_base,
-                                   &blackthorne_48x64_layout);
-        break;
-
-    case FORMAT_UNPACKED:
-        draw_unpacked_sprites(screen, sprite_data, data_size,
-                              sprite_width, sprite_height);
-        break;
-
-    case FORMAT_PACKED32:
-        draw_packed32_sprites(screen, sprite_data, data_size, pal_base);
-        break;
+        x += sprite_width;
+        if (x > screen->w - sprite_width) {
+            x = 0;
+            y += sprite_height;
+            if (y >= screen->h)
+                break;
+        }
     }
 
     SDL_Flip(screen);

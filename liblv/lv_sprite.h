@@ -19,27 +19,66 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+struct lv_chunk;
+
 /**
  * \defgroup lv_sprite Sprites
  * \{
  *
- * Lost Vikings uses VGA 320x240 Mode-X planar graphics. There are multiple
- * sprite formats:
- *
- *  - Raw: Sprite data is stored in raw planar form and can be blitted
- *    directly to the screen. This format does not support transparency.
- *
- *  - Unpacked: Sprite data is stored in an unpacked format with a
- *    transparency mask preceeding each set of 8 pixels. The format is
- *    unpacked because the transparent pixels are stored as zeros in
- *    the data chunk.
- *
- *  - Packed: Sprite data is stored in a packed format with a transparency
- *    mask preceeding each set of 8 pixels. Packed sprites are always 32x32
- *    pixels and are are limited to 16 colors (each byte stores 2 pixels).
- *    Transparent pixels are not stored, so this format provides some
- *    compression for sprites.
+ * Lost Vikings uses VGA 320x240 Mode-X planar graphics.
  */
+
+/**
+ * Sprite formats.
+ */
+enum {
+    /**
+     * Raw sprite format. Sprite data is stored in raw planar form and can be
+     * blitted directly to the screen. This format does not support
+     * transparency.
+     */
+    LV_SPRITE_FORMAT_RAW,
+
+    /**
+     * Unpacked format. Sprite data is stored in an unpacked format with a
+     * transparency mask preceeding each set of 8 pixels. The format is
+     * unpacked because the transparent pixels are stored as zeros in the
+     * data chunk.
+     */
+    LV_SPRITE_FORMAT_UNPACKED,
+
+    /**
+     * Packed 32x32 format. Sprite data is stored in a packed format with a
+     * transparency mask preceeding each set of 8 pixels. Packed sprites are
+     * always 32x32 pixels and are are limited to 16 colors (each byte stores
+     * 2 pixels). Transparent pixels are not stored, so this format provides
+     * some compression for sprites.
+     */
+    LV_SPRITE_FORMAT_PACKED32,
+};
+
+/**
+ * A set of sprites.
+ */
+struct lv_sprite_set {
+    /** The chunk this set of sprites is from. */
+    unsigned               chunk_index;
+
+    /** Original planar data from the data file chunk. */
+    uint8_t                *planar_data;
+
+    /** Size of the planar data. */
+    size_t                 data_size;
+
+    /** Sprite format. */
+    unsigned               format;
+
+    /** Pointers to the start of each sprite in the set. */
+    uint8_t                **sprites;
+
+    /** Number of sprites in the set. */
+    size_t                 num_sprites;
+};
 
 /**
  * Draw a raw planar sprite onto a linear 8-bit surface. Raw sprites do not
@@ -103,6 +142,9 @@ void lv_sprite_draw_unpacked(const uint8_t *sprite, uint8_t base_color,
                              bool flip_horiz, bool flip_vert, uint8_t *dst,
                              unsigned dst_x, unsigned dst_y, size_t dst_width);
 
+void lv_sprite_layout_get_size(unsigned layout_type,
+                               size_t *r_width, size_t *r_height);
+
 /**
  * Get the size of the data required to stored an unpacked sprite. Unpacked
  * sprites use 9 bytes per pixel: 1 mask byte, followed by 8 pixels.
@@ -112,10 +154,28 @@ void lv_sprite_draw_unpacked(const uint8_t *sprite, uint8_t base_color,
  * \param height Sprite height.
  * \returns      Data size of a single sprite.
  */
-static inline size_t lv_sprite_unpacked_data_size(size_t width, size_t height)
+static inline size_t lv_sprite_data_size(unsigned format,
+                                         size_t width, size_t height)
 {
-    return ((width * height) / 8) * 9;
+    switch (format) {
+    case LV_SPRITE_FORMAT_RAW:
+        return width * height;
+    case LV_SPRITE_FORMAT_UNPACKED:
+        return ((width * height) / 8) * 9;
+    default:
+        return 0;
+    }
 }
+
+void lv_sprite_draw(const uint8_t *sprite, size_t width, size_t height,
+                    unsigned format, uint8_t base_color,
+                    bool flip_horiz, bool flip_vert,
+                    uint8_t *dst, unsigned dst_x, unsigned dst_y,
+                    size_t dst_width);
+
+void lv_sprite_load_set(struct lv_sprite_set *set, unsigned format,
+                        size_t sprite_width, size_t sprite_height,
+                        struct lv_chunk *chunk);
 
 /* \} */
 

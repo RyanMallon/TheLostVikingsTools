@@ -551,8 +551,7 @@ static int load_sprite32_sets(struct lv_pack *pack, struct lv_level *level,
 {
     struct lv_sprite_set *set;
     struct lv_chunk *chunk;
-    uint16_t chunk_index, offset, first_offset;
-    struct buffer sprites_buf;
+    uint16_t chunk_index;
     uint8_t a, b, c;
 
     /*
@@ -574,20 +573,7 @@ static int load_sprite32_sets(struct lv_pack *pack, struct lv_level *level,
         /* Load the set */
         set = &level->sprite32_sets[level->num_sprite32_sets];
         chunk = lv_pack_get_chunk(pack, chunk_index);
-        lv_decompress_chunk(chunk, &set->planar_data);
-
-        set->data_size = chunk->decompressed_size;
-        buffer_init_from_data(&sprites_buf, set->planar_data, set->data_size);
-        set->num_sprites = 0;
-        buffer_peek_le16(&sprites_buf, 0, &first_offset);
-        while (1) {
-            buffer_get_le16(&sprites_buf, &offset);
-            if (buffer_offset(&sprites_buf) >= first_offset)
-                break;
-
-            set->sprites[set->num_sprites++] = set->planar_data + offset;
-            set->format = LV_SPRITE_FORMAT_PACKED;
-        }
+        lv_sprite_load_set(set, LV_SPRITE_FORMAT_PACKED32, 32, 32, chunk);
 
         lv_debug(LV_DEBUG_LEVEL,
                  "  [%.2zx] Chunk=%.4d (%.4x), num_sprites=%2zd, %.2x:%.2x:%.2x",
@@ -637,12 +623,15 @@ static void update_unpacked_sprite_sets(struct lv_level *level)
              * have 9 bytes per 8 pixels (mask + pixel data).
              */
             tile_size = min(obj->width, obj->height);
-	    sprite_size = lv_sprite_unpacked_data_size(tile_size, tile_size);
+	    sprite_size = lv_sprite_data_size(LV_SPRITE_FORMAT_UNPACKED,
+                                              tile_size, tile_size);
             if (sprite_size == 0)
                 continue;
 
             set->format = LV_SPRITE_FORMAT_UNPACKED;
             set->num_sprites = set->data_size / sprite_size;
+            set->sprites = calloc(set->data_size, sizeof(uint8_t *));
+
             for (j = 0; j < set->num_sprites; j++)
                 set->sprites[j] = &set->planar_data[j * sprite_size];
 
@@ -725,14 +714,14 @@ static void load_level_exit(struct lv_pack *pack, struct lv_level *level,
 static void load_something3(struct lv_pack *pack, struct lv_level *level,
                             struct buffer *buf)
 {
-    uint16_t a;
+    uint16_t a, size, offset = 0;
     uint8_t b, c;
 
     /*
      * Entries are 4 bytes:
      *   [00] u16: 0xffff ends
      *   [02]  u8:
-     *   [03]  u8: multiply with previous
+     *   [03]  u8:
      */
     lv_debug(LV_DEBUG_LEVEL, "Loading something3");
     while (1) {
@@ -741,7 +730,16 @@ static void load_something3(struct lv_pack *pack, struct lv_level *level,
             break;
         buffer_get_u8(buf, &b);
         buffer_get_u8(buf, &c);
-        lv_debug(LV_DEBUG_LEVEL, "  %.4x: %.2x %.2x", a, b, c);
+
+        /*
+         * The two operands are used to calculate an offset for the next
+         * entry.
+         */
+        size = (b * c) * 0x48;
+
+        lv_debug(LV_DEBUG_LEVEL, "  %.4x: %.2x %.2x (%dx%d): size=%.4x, offset=%.4x",
+                 a, b, c, b << 3, c << 3, size, offset);
+        offset += size;
     }
 
 }
