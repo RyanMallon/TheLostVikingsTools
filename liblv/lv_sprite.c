@@ -73,6 +73,16 @@ static const struct sprite_layout blackthorne_48x64_layout = {
     .num_parts = 6,
 };
 
+static const struct sprite_layout blackthorne_64x64_layout = {
+    .parts = {
+        { 0,  0, 32, 32},
+        {32,  0, 32, 32},
+        { 0, 32, 32, 32},
+        {32, 32, 32, 32},
+    },
+    .num_parts = 4,
+};
+
 static const struct sprite_layout *get_sprite_layout(size_t width,
                                                      size_t height)
 {
@@ -82,6 +92,8 @@ static const struct sprite_layout *get_sprite_layout(size_t width,
         return &blackthorne_48x48_layout;
     if (width == 48 && height == 64)
         return &blackthorne_48x64_layout;
+    if (width == 64 && height == 64)
+        return &blackthorne_64x64_layout;
     return NULL;
 }
 
