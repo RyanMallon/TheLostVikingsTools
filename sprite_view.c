@@ -252,10 +252,6 @@ int main(int argc, char **argv)
 
     lv_pack_load(pack_filename, &pack, blackthorne);
     chunk = lv_pack_get_chunk(&pack, chunk_index);
-    if (uncompressed)
-        sprite_data = chunk->data + chunk->data_offset;
-    else
-        lv_decompress_chunk(chunk, &sprite_data);
 
     screen = SDL_SetVideoMode(screen_width, screen_height, 8, SDL_INIT_VIDEO);
 
@@ -268,24 +264,39 @@ int main(int argc, char **argv)
     if (splash) {
         /*
          * Splash screen chunks store the data size as the number of bytes
-         * per plane, so it needs to be multiplied by 4.
+         * per plane, so it needs to be multiplied by 4. Use this to
+         * recalculate the correct height. Most splash screens should use
+         * width 344.
          */
         data_size *= 4;
-    }
+        sprite_height = data_size / sprite_width;
+        printf("Recaculated height: %zd\n", sprite_height);
 
-    lv_sprite_load_set(&sprite_set, format, sprite_width, sprite_height, chunk);
-    printf("%zd sprites\n", sprite_set.num_sprites);
-    for (i = 0, x = 0, y = 0; i < sprite_set.num_sprites; i++) {
-        lv_sprite_draw(sprite_set.sprites[i],
-                       sprite_width, sprite_height, format,
-                       pal_base, false, false, screen->pixels, x, y, screen->w);
+        if (uncompressed)
+            sprite_data = chunk->data + chunk->data_offset;
+        else
+            lv_decompress_chunk(chunk, &sprite_data);
 
-        x += sprite_width;
-        if (x > screen->w - sprite_width) {
-            x = 0;
-            y += sprite_height;
-            if (y >= screen->h)
-                break;
+        lv_sprite_draw(sprite_data, sprite_width, sprite_height, format,
+                       pal_base, false, false, screen->pixels, 0, 0, screen->w);
+
+
+    } else {
+        lv_sprite_load_set(&sprite_set, format,
+                           sprite_width, sprite_height, chunk);
+        printf("%zd sprites\n", sprite_set.num_sprites);
+        for (i = 0, x = 0, y = 0; i < sprite_set.num_sprites; i++) {
+            lv_sprite_draw(sprite_set.sprites[i], sprite_width, sprite_height,
+                           format, pal_base, false, false, screen->pixels,
+                           x, y, screen->w);
+
+            x += sprite_width;
+            if (x > screen->w - sprite_width) {
+                x = 0;
+                y += sprite_height;
+                if (y >= screen->h)
+                    break;
+            }
         }
     }
 
