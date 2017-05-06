@@ -90,7 +90,7 @@ static void usage(const char *progname, int status)
 {
     int i;
 
-    printf("Usage: %s [OPTIONS...] FILE\n", progname);
+    printf("Usage: %s [OPTIONS...] FILE SPRITE_CHUNK\n", progname);
     printf("\nOptions:\n");
     printf("  -B, --blackthorne           Pack file is Blackthorne format\n");
     printf("  -f, --format=FORMAT         Sprite format\n");
