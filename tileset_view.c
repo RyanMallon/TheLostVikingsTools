@@ -24,6 +24,7 @@
 #include <liblv/lv_pack.h>
 #include <liblv/lv_sprite.h>
 #include <liblv/lv_level.h>
+#include <liblv/lv_debug.h>
 #include <liblv/common.h>
 
 #include "sdl_helpers.h"
@@ -106,7 +107,7 @@ static SDL_Surface *load_tileset(unsigned chunk_index)
     SDL_LockSurface(surf);
     pixels = surf->pixels;
     for (i = 0; i < num_tiles; i++)
-        lv_sprite_draw_raw(data + (i * TILE_DATA_SIZE), TILE_SIZE, TILE_SIZE,
+        lv_sprite_draw_raw(data + (i * TILE_DATA_SIZE), 0, TILE_SIZE, TILE_SIZE,
 			   false, false, pixels, i * TILE_SIZE, 0, surf->w);
     SDL_UnlockSurface(surf);
 
@@ -116,11 +117,14 @@ static SDL_Surface *load_tileset(unsigned chunk_index)
 
 static void usage(const char *progname, int status)
 {
-    printf("Usage: %s [OPTIONS...] PACK_FILE TILESET_CHUNK PREFABS_CHUNK\n",
+    printf("Usage: %s [OPTIONS...] PACK_FILE LEVEL_NUM\n",
            progname);
     printf("\nOptions:\n");
     printf("  -B, --blackthorne    Pack file is Blackthorne format\n");
-    printf("  -p, --palette=CHUNK  Load palette from chunk\n");
+    printf("  -d, --debug=FLAGS    Enable debugging\n");
+    printf("  -w, --width=WIDTH    Width in tiles\n");
+    printf("  -h, --width=HEIGHT   Height in tiles\n");
+    printf("  -c, --chunk=CHUNK    Level header chunk (overrides level num)\n");
     exit(status);
 }
 
@@ -135,15 +139,19 @@ int main(int argc, char **argv)
 {
     const struct option long_options[] = {
         {"blackthorne",   no_argument,       0, 'B'},
+        {"debug",         required_argument, 0, 'd'},
+        {"width",         required_argument, 0, 'w'},
+        {"height",        required_argument, 0, 'h'},
+        {"chunk",         required_argument, 0, 'c'},
     };
-    const char *short_options = "B";
+    const char *short_options = "Bd:w:h:c:";
     SDL_Surface *surf_tileset;
     size_t screen_width = SCREEN_WIDTH, screen_height = SCREEN_HEIGHT;
     bool blackthorne = false;
     char *pack_filename;
     const struct lv_level_info *level_info;
-    unsigned level_num, i, x = 0, y = 0;
-    int c, option_index;
+    unsigned level_num, i, x = 0, y = 0, debug_flags = 0;
+    int c, option_index, chunk_header = -1;
 
     while (1) {
         c = getopt_long(argc, argv, short_options, long_options, &option_index);
@@ -153,6 +161,24 @@ int main(int argc, char **argv)
         switch (c) {
         case 'B':
             blackthorne = true;
+            break;
+
+        case 'd':
+            debug_flags = strtoul(optarg, NULL, 0);
+            break;
+
+        case 'w':
+            screen_width = strtoul(optarg, NULL, 0);
+            screen_width *= (PREFAB_SIZE + GAP);
+            break;
+
+        case 'h':
+            screen_height = strtoul(optarg, NULL, 0);
+            screen_height *= (PREFAB_SIZE + GAP);
+            break;
+
+        case 'c':
+            chunk_header = strtoul(optarg, NULL, 0);
             break;
 
 	default:
@@ -169,6 +195,9 @@ int main(int argc, char **argv)
         usage(argv[0], EXIT_FAILURE);
     }
 
+    if (debug_flags)
+        lv_debug_toggle(debug_flags);
+
     lv_pack_load(pack_filename, &pack, blackthorne);
 
     level_info = lv_level_get_info(&pack, level_num);
@@ -177,7 +206,10 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    lv_level_load(&pack, &level, level_info->chunk_level_header, 0xffff);
+    if (chunk_header == -1)
+        chunk_header = level_info->chunk_level_header;
+
+    lv_level_load(&pack, &level, chunk_header, 0xffff);
 
     /* Load the prefabs */
     printf("Loaded %zd prefabs\n", level.num_prefabs);
@@ -190,9 +222,11 @@ int main(int argc, char **argv)
         draw_prefab(screen, surf_tileset, &level.prefabs[i], x, y);
 
         x += PREFAB_SIZE + GAP;
-        if (x > SCREEN_WIDTH - (PREFAB_SIZE + GAP)) {
+        if (x > screen_width - (PREFAB_SIZE + GAP)) {
             x = 0;
             y += PREFAB_SIZE + GAP;
+            if (y > screen_height - (PREFAB_SIZE + GAP))
+                break;
         }
     }
 
