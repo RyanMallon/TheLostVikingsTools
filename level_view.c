@@ -193,15 +193,18 @@ static SDL_Surface *load_tileset(unsigned chunk_index)
 }
 
 static void draw_tile(SDL_Surface *surf, SDL_Surface *surf_tileset,
-                      unsigned tile, unsigned flags, unsigned x, unsigned y)
+                      unsigned tile, bool sky, unsigned flags,
+                      unsigned x, unsigned y)
 {
     SDL_Rect src_rect, dst_rect;
     uint8_t base_color;
 
-    if (!draw_foreground && (flags & LV_PREFAB_FLAG_FOREGROUND))
-        return;
-    if (!draw_background && !(flags & LV_PREFAB_FLAG_FOREGROUND))
-        return;
+    if (!sky) {
+        if (!draw_foreground && (flags & LV_PREFAB_FLAG_FOREGROUND))
+            return;
+        if (!draw_background && !(flags & LV_PREFAB_FLAG_FOREGROUND))
+            return;
+    }
 
     src_rect.x = tile * TILE_WIDTH;
     src_rect.y = 0;
@@ -226,14 +229,15 @@ static void draw_tile(SDL_Surface *surf, SDL_Surface *surf_tileset,
 }
 
 static void draw_prefab(SDL_Surface *surf, SDL_Surface *surf_tileset,
-                        struct lv_tile_prefab *prefab, unsigned x, unsigned y)
+                        struct lv_tile_prefab *prefab, bool sky,
+                        unsigned x, unsigned y)
 {
-    draw_tile(surf, surf_tileset, prefab->tile[0], prefab->flags[0], x, y);
-    draw_tile(surf, surf_tileset, prefab->tile[1], prefab->flags[1]
+    draw_tile(surf, surf_tileset, prefab->tile[0], sky, prefab->flags[0], x, y);
+    draw_tile(surf, surf_tileset, prefab->tile[1], sky, prefab->flags[1]
               , x + TILE_WIDTH, y);
-    draw_tile(surf, surf_tileset, prefab->tile[2], prefab->flags[2],
+    draw_tile(surf, surf_tileset, prefab->tile[2], sky, prefab->flags[2],
               x, y + TILE_HEIGHT);
-    draw_tile(surf, surf_tileset, prefab->tile[3], prefab->flags[3],
+    draw_tile(surf, surf_tileset, prefab->tile[3], sky, prefab->flags[3],
               x + TILE_WIDTH, y + TILE_HEIGHT);
 }
 
@@ -355,7 +359,7 @@ static void draw_level(SDL_Surface *surf, SDL_Surface *surf_tileset)
             for (x = 0; x < level.width; x++) {
                 prefab = lv_level_get_bg_prefab_at(&level, x, y, NULL, &flags);
                 if (prefab)
-                    draw_prefab(surf, surf_tileset, prefab,
+                    draw_prefab(surf, surf_tileset, prefab, true,
                                 x * PREFAB_WIDTH, y * PREFAB_HEIGHT);
             }
         }
@@ -367,7 +371,7 @@ static void draw_level(SDL_Surface *surf, SDL_Surface *surf_tileset)
             for (x = 0; x < level.width; x++) {
                 prefab = lv_level_get_prefab_at(&level, x, y, NULL, &flags);
                 if (prefab)
-                    draw_prefab(surf, surf_tileset, prefab,
+                    draw_prefab(surf, surf_tileset, prefab, false,fb
                                 x * PREFAB_WIDTH, y * PREFAB_HEIGHT);
             }
         }
