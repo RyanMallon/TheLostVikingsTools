@@ -371,7 +371,7 @@ static void draw_level(SDL_Surface *surf, SDL_Surface *surf_tileset)
             for (x = 0; x < level.width; x++) {
                 prefab = lv_level_get_prefab_at(&level, x, y, NULL, &flags);
                 if (prefab)
-                    draw_prefab(surf, surf_tileset, prefab, false,fb
+                    draw_prefab(surf, surf_tileset, prefab, false,
                                 x * PREFAB_WIDTH, y * PREFAB_HEIGHT);
             }
         }
