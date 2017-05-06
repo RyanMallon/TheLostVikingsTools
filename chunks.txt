@@ -38,16 +38,18 @@ Blackthorne
 012..025: audio (xmi)
 026..040: audio (creative voice)
 
-042: sprites (raw 16x16, compressed)
-043: sprites (raw 16x16, compressed)
-044: sprites (raw 16x16, compressed)
-045: sprites (raw 16x16, compressed)
+041: (uncompressed) object data base, format is different to The Lost Vikings
+
+042: sprites (raw 32x48): player sprites
+043: sprites (raw 48x48): whip badguy
+044: sprites (raw 32x48): androthi
+045: sprites (raw 32x48): ogre
 046: sprites (raw 16x16, compressed)
 047: sprites (raw 16x16, compressed)
 048: palette (16 colors, red)
 049: palette (16 colors, hud?)
 
-04c: sprites (raw 32x32) - Hud items
+04c: sprites (raw 32x32) - hud items
 04d: sprites (unpacked 32x32) - character portraits
 04e: health bar (16x16, unpacked, compressed)
 
@@ -68,6 +70,8 @@ Blackthorne
 06c: map data - blackthorne logo
 06e: header   - blackthorne logo
 
+06f: sprites (16x16 unpacked): menu selector?
+
 071: tileset  - game over
 073: prefabs  - game over
 074: map data - game over
@@ -83,12 +87,18 @@ Blackthorne
 080: prefabs  - sarlac
 083: header   - sarlac
 085: header   - sarlac (alt?)
+086: sprites (unpacked, 32x32): sarlac bauble
+087: sprites (unpacked, 16x16?): sarlac fire
+089: sprites (unpacked, 16x16?):
 
 08d: palette  - sarlac's minions
 08e: tileset  - sarlac's minions
 090: prefabs  - sarlac's minions
 091: map data - sarlac's minions
 092: header   - sarlac's minions
+093: sprites (raw, 64x64)
+094: sprites (raw, 48x64)
+095: sprites (raw, 32x32)
 
 097: tileset  - sarlac hand
 099: prefabs  - sarlac hand
@@ -120,6 +130,9 @@ Blackthorne
 0bb: background (5x3)
 0bc: map (8x5)
 
+0be: map data
+0bf: map data
+
 0c0: level header
 0c1: level header
 
@@ -136,7 +149,7 @@ Blackthorne
 
 0f1: sprites (raw, 16x16)
 0f2: sprites (raw, 16x16)
-0f4: sprites (raw, 32x32): plant monster
+0f4: sprites (raw, variable): plant monster
 0f7: sprites (raw, 16x16)
 0f8: sprites (unpacked, 16x16)
 0f9: sprites (unpacked, 16x16): flame
@@ -152,6 +165,8 @@ Blackthorne
 104: sprites (raw, 16x16)
 105: sprites (raw, 16x16)
 106: sprites (raw, 16x16) bomb
+107: sprites (unpacked, 16x16) wasp
+108: sprites (unpacked, 16x16) levitator
 
 10d: sprites (raw, 16x16)
 10e: sprites (raw, 32x32)?
@@ -160,6 +175,7 @@ Blackthorne
 111: sprites (raw, 32x32)?
 112: sprites (raw, 32x32)?
 114: sprites (raw, 32x??)
+11a: sprites (raw, 32x32)
 11c: sprites (raw, 16x16)
 
 109..10c: palettes (16 colors)
@@ -167,6 +183,7 @@ Blackthorne
 125..131: palettes (16 colors)
 
 135..13a: audio (xmi)
+13b: sprites (raw, 48x48): whip badguy
 
 157: sprites (raw, 8x8) Tileset?
 159: prefabs
