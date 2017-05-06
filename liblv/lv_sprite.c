@@ -40,7 +40,22 @@ struct sprite_layout {
     size_t             num_parts;
 };
 
-static const struct sprite_layout blackthorne_32x48_layout = {
+struct sprite_layout_selector {
+    size_t                     width;
+    size_t                     height;
+    const struct sprite_layout *layout;
+};
+
+static const struct sprite_layout layout_16x48 = {
+    .parts = {
+        { 0,  0, 16, 16},
+        { 0, 16, 16, 16},
+        { 0, 32, 16, 16},
+    },
+    .num_parts = 3,
+};
+
+static const struct sprite_layout layout_32x48 = {
     .parts = {
         { 0,  0, 16, 16},
         {16,  0, 16, 16},
@@ -49,7 +64,7 @@ static const struct sprite_layout blackthorne_32x48_layout = {
     .num_parts = 3,
 };
 
-static const struct sprite_layout blackthorne_48x48_layout = {
+static const struct sprite_layout layout_48x48 = {
     .parts = {
         { 0,  0, 16, 16},
         {16,  0, 16, 16},
@@ -61,7 +76,7 @@ static const struct sprite_layout blackthorne_48x48_layout = {
     .num_parts = 6,
 };
 
-static const struct sprite_layout blackthorne_48x64_layout = {
+static const struct sprite_layout layout_48x64 = {
     .parts = {
         { 0,  0, 32, 32},
         {32,  0, 16, 16},
@@ -73,7 +88,7 @@ static const struct sprite_layout blackthorne_48x64_layout = {
     .num_parts = 6,
 };
 
-static const struct sprite_layout blackthorne_64x64_layout = {
+static const struct sprite_layout layout_64x64 = {
     .parts = {
         { 0,  0, 32, 32},
         {32,  0, 32, 32},
@@ -83,17 +98,23 @@ static const struct sprite_layout blackthorne_64x64_layout = {
     .num_parts = 4,
 };
 
+static const struct sprite_layout_selector layouts[] = {
+    {16, 48, &layout_16x48},
+    {32, 48, &layout_32x48},
+    {48, 48, &layout_48x48},
+    {48, 64, &layout_48x64},
+    {64, 64, &layout_64x64},
+};
+
 static const struct sprite_layout *get_sprite_layout(size_t width,
                                                      size_t height)
 {
-    if (width == 32 && height == 48)
-        return &blackthorne_32x48_layout;
-    if (width == 48 && height == 48)
-        return &blackthorne_48x48_layout;
-    if (width == 48 && height == 64)
-        return &blackthorne_48x64_layout;
-    if (width == 64 && height == 64)
-        return &blackthorne_64x64_layout;
+    int i;
+
+    for (i = 0; i < ARRAY_SIZE(layouts); i++)
+        if (width == layouts[i].width && height == layouts[i].height)
+            return layouts[i].layout;
+
     return NULL;
 }
 
@@ -237,6 +258,7 @@ void lv_sprite_draw(const uint8_t *sprite, size_t width, size_t height,
 
     draw_func = draw_funcs[format];
     layout = get_sprite_layout(width, height);
+
     if (layout) {
         /* Multipart sprite */
         for (i = 0, offset = 0; i < layout->num_parts; i++) {
@@ -246,7 +268,8 @@ void lv_sprite_draw(const uint8_t *sprite, size_t width, size_t height,
                       dst_x + layout->parts[i].x, dst_y + layout->parts[i].y,
                       dst_width);
 
-            offset += layout->parts[i].width * layout->parts[i].height;
+            offset += lv_sprite_data_size(format, layout->parts[i].width,
+                                          layout->parts[i].height);
         }
 
     } else {
