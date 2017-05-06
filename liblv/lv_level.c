@@ -144,7 +144,8 @@ static int load_map(struct lv_pack *pack, struct lv_level *level,
                     uint16_t **map)
 {
     struct lv_chunk *chunk;
-    uint8_t *data, *tmp;
+    uint8_t *data;
+    uint16_t *tmp;
     size_t map_size;
 
     map_size = width * height * sizeof(uint16_t);
@@ -166,9 +167,9 @@ static int load_map(struct lv_pack *pack, struct lv_level *level,
             return -1;
         }
 
-        *map = tmp;
-        memset(*map + chunk->decompressed_size, 0,
+        memset((uint8_t *)tmp + chunk->decompressed_size, 0,
                map_size - chunk->decompressed_size);
+        *map = tmp;
     }
 
     return 0;
