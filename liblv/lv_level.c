@@ -106,7 +106,7 @@ const struct lv_level_info *lv_level_get_info(struct lv_pack *pack,
         num_levels = ARRAY_SIZE(lv_level_info);
     }
 
-    if (level_num < 1 || level_num >= num_levels)
+    if (level_num < 1 || level_num >= num_levels + 1)
         return NULL;
 
     return &level_info[level_num - 1];
@@ -144,17 +144,32 @@ static int load_map(struct lv_pack *pack, struct lv_level *level,
                     uint16_t **map)
 {
     struct lv_chunk *chunk;
-    uint8_t *data;
+    uint8_t *data, *tmp;
     size_t map_size;
 
     map_size = width * height * sizeof(uint16_t);
 
     chunk = lv_pack_get_chunk(pack, chunk_index);
-    if (chunk->decompressed_size != map_size)
-        return -1;
-
     lv_decompress_chunk(chunk, &data);
     *map = (uint16_t *)data;
+
+    if (chunk->decompressed_size < map_size) {
+        /*
+         * Some maps don't have the right size for some reason.
+         * Try to fix it up.
+         */
+        lv_debug(LV_DEBUG_LEVEL, "Warning: map data too small (%d < %d bytes)",
+                 chunk->decompressed_size, map_size);
+        tmp = realloc(*map, map_size);
+        if (!tmp) {
+            free(*map);
+            return -1;
+        }
+
+        *map = tmp;
+        memset(*map + chunk->decompressed_size, 0,
+               map_size - chunk->decompressed_size);
+    }
 
     return 0;
 }
@@ -476,13 +491,13 @@ static int load_raw_sprite_sets(struct lv_pack *pack, struct lv_level *level,
                                 struct buffer *buf)
 {
     uint16_t chunk_index;
-    uint8_t a, b, c;
+    uint8_t width, height, c;
 
     /*
      * Entries are 5 bytes (max 16 entries)
      * u16: 0xffff ends
-     *  u8:
-     *  u8: Multiplied with previous
+     *  u8: width  (>> 3)
+     *  u8: height (>> 3)
      *  u8:
      */
     lv_debug(LV_DEBUG_LEVEL, "Loading raw sprite sets:");
@@ -490,12 +505,12 @@ static int load_raw_sprite_sets(struct lv_pack *pack, struct lv_level *level,
         buffer_get_le16(buf, &chunk_index);
         if (chunk_index == 0xffff)
             break;
-        buffer_get_u8(buf, &a);
-        buffer_get_u8(buf, &b);
+        buffer_get_u8(buf, &width);
+        buffer_get_u8(buf, &height);
         buffer_get_u8(buf, &c);
 
-        lv_debug(LV_DEBUG_LEVEL, "  Chunk=%03x: %.2x %.2x %.2x",
-                 chunk_index, a, b, c);
+        lv_debug(LV_DEBUG_LEVEL, "  Chunk=%03x: (%2dx%2d) %.2x",
+                 chunk_index, width << 3, height << 3, c);
     }
 
     return 0;
