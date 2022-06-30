@@ -1,0 +1,681 @@
+*****************************************
+*** The Lost Vikings ***
+*****************************************
+    DATA.DAT
+    Data structure:
+
+    This file, and vikings_levels.ods, were kindly provided by Albert Thalheim.
+
+********************************************************************
+Num(HxAdr)(Fsize): (structure) Description
+********************************************************************
+000(x0000)(   32): 		Header?
+001(x0001)(22016): (1-344x64)	HUD panel (straight byte-to-pixel)
+
+002(x0002)( 5760): (96- 8x 8)	Dialog and Font indexed glyphs: color indexes range from 0 to 3; 'dialog box' colors set according to context, font glyphs white with shadow(gray-scale).
+
+	HUD area
+003(x0003)(   48): 		Palette (16 colors) used with HUD figures
+004(x0004)(  768): ( 1-32x24)	Eric:   active
+005(x0005)(  768): ( 1-32x24)	Baleog: active
+006(x0006)(  768): ( 1-32x24)	Olaf:   active
+007(x0007)(  768): ( 1-32x24)	Eric:   inactive
+008(x0008)(  768): ( 1-32x24)	Baleog: inactive
+009(x0009)(  768): ( 1-32x24)	Olaf:   inactive
+010(x000A)(  768): ( 1-32x24)	Eric:   dead
+011(x000B)(  768): ( 1-32x24)	Baleog: dead
+012(x000C)(  768): ( 1-32x24)	Olaf:   dead
+013(x000D)( 1568): ( 7-32x 7)	Health indexed glyphs (uses 'plane' scheme)
+014(x000E)( 6144): (24-16x16)	Collectible items indexed glyphs
+
+
+====================================================================
+	WORLD 3
+015(x000F)(   48): 		Palette ( 16 colors) Used in world 3, scenes 5 to 9, with palette 17 offset 112
+016(x0010)(   48): 		Palette ( 16 colors) Used in world 3, scene 10, with palette 17 offset 112
+017(x0011)(  384): 		Palette (128 colors) used in World 3, all levels except 11
+018(x0012)(  384): 		Palette (128 colors) used in World 3, level 11
+019(x0013)(17472): Level  5 Tiles Parts
+020(x0014)( 2184): Level  5 Pixels mask
+021(x0015)( 1624): Level  5 Tiles Offsets
+022(x0016)(21312): Level  6 Tiles Parts
+023(x0017)( 2664): Level  6 Pixels mask
+024(x0018)( 1336): Level  6 Tiles Offsets
+025(x0019)(26048): Level  7 Tiles Parts
+026(x001A)( 3256): Level  7 Pixels mask
+027(x001B)( 1904): Level  7 Tiles Offsets
+028(x001C)(21312): Level  8 Tiles Parts
+029(x001D)( 2664): Level  8 Pixels mask
+030(x001E)( 1248): Level  8 Tiles Offsets
+031(x001F)(23552): Level  9 Tiles Parts
+032(x0020)( 2944): Level  9 Pixels mask
+033(x0021)( 1584): Level  9 Tiles Offsets
+034(x0022)(19712): Level 10 Tiles Parts
+035(x0023)( 2464): Level 10 Pixels mask
+036(x0024)( 1304): Level 10 Tiles Offsets
+037(x0025)(18368): Level 11 Tiles Parts
+038(x0026)( 2296): Level 11 Pixels mask
+039(x0027)( 1272): Level 11 Tiles Offsets
+040(x0028)(  556): Level  5
+041(x0029)( 2806): Level  5 Tiles Map
+042(x002A)(  617): Level  6
+043(x002B)( 6144): Level  6 Tiles Map
+044(x002C)(  506): Level  7
+045(x002D)( 5120): Level  7 Tiles Map
+046(x002E)(  553): Level  8
+047(x002F)( 4096): Level  8 Tiles Map
+048(x0030)(  665): Level  9
+049(x0031)( 6144): Level  9 Tiles Map
+050(x0032)(  629): Level 10
+051(x0033)( 6144): Level 10 Tiles Map
+052(x0034)(  681): Level 11
+053(x0035)( 6144): Level 11 Tiles Map
+
+====================================================================
+	WORLD 4
+054(x0036)(   48): 		Palette ( 16 colors) Used in world 4, scene 12, with palette 56 at offset 112
+055(x0037)(   48): 		Palette ( 16 colors) Used in world 4, scenes 13 to 17, with palette 56 at offset 112
+056(x0038)(  384): 		Palette (128 colors) used in world 4
+057(x0039)(28608): Level 12 Tiles Parts
+058(x003A)( 3576): Level 12 Pixels mask
+059(x003B)( 1928): Level 12 Tiles Offsets
+060(x003C)(15424): Level 13 Tiles Parts
+061(x003D)( 1928): Level 13 Pixels mask
+062(x003E)(  816): Level 13 Tiles Offsets
+063(x003F)(17024): Level 14 Tiles Parts
+064(x0040)( 2128): Level 14 Pixels mask
+065(x0041)(  920): Level 14 Tiles Offsets
+066(x0042)(19136): Level 15 Tiles Parts
+067(x0043)( 2392): Level 15 Pixels mask
+068(x0044)( 1152): Level 15 Tiles Offsets
+069(x0045)(15360): Level 16 Tiles Parts
+070(x0046)( 1920): Level 16 Pixels mask
+071(x0047)(  928): Level 16 Tiles Offsets
+072(x0048)(18304): Level 17 Tiles Parts
+073(x0049)( 2288): Level 17 Pixels mask
+074(x004A)( 1256): Level 17 Tiles Offsets
+075(x004B)(  624): Level 12
+076(x004C)( 3456): Level 12 Tiles Map
+077(x004D)(  654): Level 13
+078(x004E)( 4704): Level 13 Tiles Map
+079(x004F)(  684): Level 14
+080(x0050)( 6144): Level 14 Tiles Map
+081(x0051)(  747): Level 15
+082(x0052)( 4608): Level 15 Tiles Map
+083(x0053)(  713): Level 16
+084(x0054)( 7680): Level 16 Tiles Map
+085(x0055)(  687): Level 17
+086(x0056)( 6144): Level 17 Tiles Map
+
+
+====================================================================
+	WORLD 5
+087(x0057)(  384): 		Palette (128 colors) used in world 5, levels 18, 22, 23 and 24
+088(x0058)(  384): 		Palette (128 colors) used in world 5, levels 19, 20 and 21
+089(x0059)(  384): 		Palette (128 colors) used in world 5, level 25
+090(x005A)(25856): Level 18 Tiles Parts
+091(x005B)( 3232): Level 18 Pixels mask
+092(x005C)( 1528): Level 18 Tiles Offsets
+093(x005D)(22720): Level 19 Tiles Parts
+094(x005E)( 2840): Level 19 Pixels mask
+095(x005F)( 1240): Level 19 Tiles Offsets
+096(x0060)(30336): Level 20 Tiles Parts
+097(x0061)( 3792): Level 20 Pixels mask
+098(x0062)( 1736): Level 20 Tiles Offsets
+099(x0063)(20736): Level 21 Tiles Parts
+100(x0064)( 2592): Level 21 Pixels mask
+101(x0065)( 1088): Level 21 Tiles Offsets
+102(x0066)(18624): Level 22 Tiles Parts
+103(x0067)( 2328): Level 22 Pixels mask
+104(x0068)(  872): Level 22 Tiles Offsets
+105(x0069)(19840): Level 23 Tiles Parts
+106(x006A)( 2480): Level 23 Pixels mask
+107(x006B)( 1040): Level 23 Tiles Offsets
+108(x006C)(29952): Level 24 Tiles Parts
+109(x006D)( 3744): Level 24 Pixels mask
+110(x006E)( 1448): Level 24 Tiles Offsets
+111(x006F)(31232): Level 25 Tiles Parts
+112(x0070)( 3904): Level 25 Pixels mask
+113(x0071)( 1344): Level 25 Tiles Offsets
+114(x0072)(  718): Level 18
+115(x0073)( 6336): Level 18 Tiles Map
+116(x0074)(  714): Level 19
+117(x0075)( 4212): Level 19 Tiles Map
+118(x0076)(  834): Level 20
+119(x0077)( 6336): Level 20 Tiles Map
+120(x0078)( 1072): Level 21
+121(x0079)( 6720): Level 21 Tiles Map
+122(x007A)(  910): Level 22
+123(x007B)( 5376): Level 22 Tiles Map
+124(x007C)( 1019): Level 23
+125(x007D)( 7200): Level 23 Tiles Map
+126(x007E)(  931): Level 24
+127(x007F)( 5688): Level 24 Tiles Map
+128(x0080)(  865): Level 25
+129(x0081)( 4410): Level 25 Tiles Map
+
+
+====================================================================
+	WORLD 6
+130(x0082)(  384): 		Palette (128 colors) used in world 6, levels 27, 28, 30 and 31
+131(x0083)(  384): 		Palette (128 colors) used in world 6, levels 26, 29, 32 and 33
+132(x0084)(15936): Level 26 Tiles Parts
+133(x0085)( 1992): Level 26 Pixels mask
+134(x0086)( 1008): Level 26 Tiles Offsets
+135(x0087)(25216): Level 27 Tiles Parts
+136(x0088)( 3152): Level 27 Pixels mask
+137(x0089)( 1920): Level 27 Tiles Offsets
+138(x008A)(23552): Level 28 Tiles Parts
+139(x008B)( 2944): Level 28 Pixels mask
+140(x008C)( 1888): Level 28 Tiles Offsets
+141(x008D)(17280): Level 29 Tiles Parts
+142(x008E)( 2160): Level 29 Pixels mask
+143(x008F)( 1208): Level 29 Tiles Offsets
+144(x0090)(28736): Level 30 Tiles Parts
+145(x0091)( 3592): Level 30 Pixels mask
+146(x0092)( 2888): Level 30 Tiles Offsets
+147(x0093)(24576): Level 31 Tiles Parts
+148(x0094)( 3072): Level 31 Pixels mask
+149(x0095)( 2088): Level 31 Tiles Offsets
+150(x0096)(16064): Level 32 Tiles Parts
+151(x0097)( 2008): Level 32 Pixels mask
+152(x0098)( 1000): Level 32 Tiles Offsets
+153(x0099)(16192): Level 33 Tiles Parts
+154(x009A)( 2024): Level 33 Pixels mask
+155(x009B)( 1168): Level 33 Tiles Offsets
+156(x009C)(  897): Level 26
+157(x009D)( 6256): Level 26 Tiles Map
+158(x009E)(  941): Level 27
+159(x009F)(10270): Level 27 Tiles Map
+160(x00A0)( 1017): Level 28
+161(x00A1)( 7474): Level 28 Tiles Map
+162(x00A2)( 1389): Level 29
+163(x00A3)(12320): Level 29 Tiles Map
+164(x00A4)(  930): Level 30
+165(x00A5)( 7900): Level 30 Tiles Map
+166(x00A6)( 1129): Level 31
+167(x00A7)(10240): Level 31 Tiles Map
+168(x00A8)( 1002): Level 32
+169(x00A9)(10384): Level 32 Tiles Map
+170(x00AA)( 1223): Level 33
+171(x00AB)(10384): Level 33 Tiles Map
+
+
+====================================================================
+	WORLD 2
+172(x00AC)(  384): 		Palette (128 colors) used in world 2
+173(x00AD)(   48): 		Palette ( 16 colors)
+174(x00AE)(34368): Level  2 Tiles Parts
+175(x00AF)( 4296): Level  2 Pixels mask
+176(x00B0)( 3000): Level  2 Tiles Offsets
+177(x00B1)(32960): Level  3 Tiles Parts
+178(x00B2)( 4120): Level  3 Pixels mask
+179(x00B3)( 2464): Level  3 Tiles Offsets
+180(x00B4)(35136): Level  4 Tiles Parts
+181(x00B5)( 4392): Level  4 Pixels mask
+182(x00B6)( 3208): Level  4 Tiles Offsets
+183(x00B7)(33984): Level 34 Tiles Parts
+184(x00B8)( 4248): Level 34 Pixels mask
+185(x00B9)( 2256): Level 34 Tiles Offsets
+186(x00BA)(32832): Level 35 Tiles Parts
+187(x00BB)( 4104): Level 35 Pixels mask
+188(x00BC)( 2264): Level 35 Tiles Offsets
+189(x00BD)(29504): Level 36 Tiles Parts
+190(x00BE)( 3688): Level 36 Pixels mask
+191(x00BF)( 2232): Level 36 Tiles Offsets
+192(x00C0)(35456): Level 37 Tiles Parts
+193(x00C1)( 4432): Level 37 Pixels mask
+194(x00C2)( 2544): Level 37 Tiles Offsets
+195(x00C3)(24640): Level  1 Tiles Parts
+196(x00C4)( 3080): Level  1 Pixels mask
+197(x00C5)( 1976): Level  1 Tiles Offsets
+198(x00C6)(  400): Level  1
+199(x00C7)( 1800): Level  1 Tiles Map
+200(x00C8)(  893): Level  2
+201(x00C9)( 6528): Level  2 Tiles Map
+202(x00CA)(  703): Level  3
+203(x00CB)( 5100): Level  3 Tiles Map
+204(x00CC)(  700): Level  4
+205(x00CD)( 6400): Level  4 Tiles Map
+206(x00CE)( 1327): Level 34
+207(x00CF)( 8000): Level 34 Tiles Map
+208(x00D0)( 1431): Level 35
+209(x00D1)( 7854): Level 35 Tiles Map
+210(x00D2)( 1431): Level 36
+211(x00D3)(10640): Level 36 Tiles Map
+212(x00D4)( 1230): Level 37
+213(x00D5)(11536): Level 37 Tiles Map
+
+
+====================================================================
+	WORLD 7, LEVEL K
+214(x00D6)(  384): 		Palette (128 colors) used in world 7, level K
+215(x00D7)(20608): Level  K Tiles Parts
+216(x00D8)( 2576): Level  K Pixels mask
+217(x00D9)( 1616): Level  K Tiles Offsets
+218(x00DA)(  311): Level  K
+219(x00DB)(  660): Level  K Tiles Map
+
+
+====================================================================
+	SPRITES
+
+220(x00DC)(   48): 		Palette ( 16 colors) used with sprites 220 to 228 (or all main palettes at offset 240)
+221(x00DD)(23948): (53-32x32)	Baleog:  Sprite (1): palettes 220
+222(x00DE)(  576): ( 4- 8x 8)	Arrow sprite
+223(x00DF)(  576): ( 4- 8x 8)	Flaming arrow sprite
+224(x00E0)(24222): (62-32x32)	Eric:    Sprite (1): palettes 229
+225(x00E1)(25047): (50-32x32)	Olaf:    Sprite (1): palettes 220
+226(x00E2)(22753): (65-32x32)	Eric:    Sprite (2): palettes 229
+227(x00E3)(18068): (42-32x32)	Baleog:  Sprite (2): palettes 220
+228(x00E4)(22204): (50-32x32)	Olaf:    Sprite (2): palettes 220
+
+229(x00E5)(   48): 		Palette ( 16 colors) used with sprites 230 to 237 (or all main palettes at offset 176)
+230(x00E6)(  288): ( 1-16x16)	Drawbridge
+231(x00E7)( 1152): ( 1-32x32)	'Elevator with spikes' sprite
+232(x00E8)(  864): ( 3-16x16)	Horizontal laser sprite used in 'Spaceship' and 'Factory' levels: object x46
+233(x00E9)( 2304): ( 2-32x32)	Gun turret sprite : object x04
+234(x00EA)( 1152): ( 4-16x16)	Gun turret bullet sprite used in 'Spaceship' levels : object x05
+235(x00EB)( 1677): ( 4-32x32)	Aftiek, Janitor: sprite used in 'Spaceship' level 3, palette 229 at offset 32  object x77
+236(x00EC)( 1828): ( 4-32x32)	Robot character sprite used in 'Spaceship' level 2, palette 229 at offset 176
+237(x00ED)(  288): ( 1-16x16)	Question box sprite (16x16) object x20
+
+238(x00EE)(   48): 		Palette ( 16 colors) used with sprites 239 and 240 (or World 2 (levels 2 and 3) palette at offset 192)
+239(x00EF)( 1382): ( 6-32x32)	'Galaxy' sprite used in each world's last level, palette 238 at offset 176
+240(x00F0)(13824): ( 4-96x32)	Band of Vikings sprite
+
+241(x00F1)(   48): 		Palette ( 16 colors) used with sprites 242 to 245 (not called by main palettes though)
+242(x00F2)( 1403): ( 4-32x32)	Pharaoh sprite used in 'Egypt' level 14, palette 241 at offset 224
+243(x00F3)( 3456): ( 1-32x32)	'The End'
+244(x00F4)( 1152): ( 4-16x16)	'Setting sun' sprite
+245(x00F5)( 2304): ( 2-32x32)	'Exploding star' sprite used in all levels
+
+246(x00F6)(   48): 		Palette ( 16 colors) used with sprite 248, palette 040 at offset 192: levels 5 to 9
+247(x00F7)(   48): 		Palette ( 16 colors) used with sprite 248, palette 040 at offset 192: levels 10 and 11
+248(x00F8)( 4842): (11-32x32)	Dinosaur sprite used in 'Caves' levels
+
+249(x00F9)(   48): 		Palette ( 16 colors) used with sprite 250 (not called by main palettes though)
+250(x00FA)( 7264): (17-32x32)	'Caveman' sprite used in 'Caves' levels
+
+251(x00FB)(   48): 		Palette ( 16 colors) used with sprites 252 and 253 (or world 2, all levels, at offset 224)
+252(x00FC)( 4628): (10-32x32)	Snail sprite used in 'Caves' levels
+253(x00FD)(  576): ( 4-16x 8)	Snail spit
+
+254(x00FE)(   48): 		Palette ( 16 colors) used with sprite 255 (or world 4 (levels 12 and 13) or world 3(level 36), at offset 208)
+255(x00FF)( 4409): (12-32x32)	Scorpion sprite used in 'Egypt' levels
+
+256(x0100)(   48): 		Palette ( 16 colors) used with sprite 257 (or world 7, levels, at offset 224)
+257(x0101)( 3245): (10-32x32)	'Flower' Sprite used in 'Candy' levels?
+
+258(x0102)(   48): 		Palette ( 16 colors) used with sprite 259 (or world 4, levels 15, 16 and 17, at offset 224)
+259(x0103)( 4483): (12-32x32)	'Mummy' sprite used in 'Egypt' level15, 16 and 17
+
+260(x0104)(   48): 		Palette ( 16 colors) used with sprites 261 and 262 (or world 7, all levels, at offset 292)
+261(x0105)( 5109): (13-32x32)	'Slug with scarf' sprite used in 'Candy' levels
+262(x0106)(  288): ( 4- 8x 8)	Slug with scarf spit
+
+263(x0107)(   48): 		Palette ( 16 colors) used with sprite 264 (or world 4, levels 12, 13 and 14, at offset 224)
+264(x0108)( 5275): (12-32x32)	Pharaoh sprite used in 'Egypt' levels
+
+265(x0109)(   48): 		Palette ( 16 colors) used with sprites 266 (or world 4, levels 14 and 16, at offset 208)
+266(x010A)( 2073): ( 5-32x32)	'Snake' sprite used in 'Egypt' level 16
+
+267(x010B)(   48): 		Palette ( 16 colors) used with sprite 268 (or world 5, all levels, at offset 192)
+268(x010C)(  762): ( 2-32x32)	'Rolling Blades' sprite used in 'Wacky' levels
+
+269(x010D)(   48): 		Palette ( 16 colors) used with sprites 270 to 272 (or world 5, all levels, at offset 208)
+270(x010E)( 5299): (10-32x32)	'Gun tractor' sprite used in 'Wacky' levels
+271(x010F)(  288): ( 4- 8x 8)	Gun tractor bullet sprite
+272(x0110)( 2304): ( 2-32x32)	Striped gun sprite
+
+273(x0111)(   48): 		Palette ( 16 colors) used with sprites 274 and 275 (or world 5, all levels, at offset 224)
+274(x0112)( 2555): ( 4-32x32)	Flying bomb dropping robot sprite used in 'Wacky' levels (4-32x32)
+275(x0113)(  144): ( 2-32x32)	Exploding bomb
+
+276(x0114)(   48): 		Palette ( 16 colors) used with sprites 277 and 278 (or world 2, levels 1 and 2, at offset 192, or levels 34 and 35, at offset 192)
+277(x0115)( 2144): ( 4-32x32)	'Brain(?)' sprite used in 'Spaceship' levels
+278(x0116)(  432): ( 6- 8x 8)	'Sparkles'
+
+279(x0117)(   48): 		Palette ( 16 colors) used with sprite 281 (or world 2 levels 1, 2, 4, 35 and 37, at offset 224)
+280(x0118)(   48): 		Palette ( 16 colors) used with sprite 281 (or world 2 level 34, at offset 224)
+281(x0119)( 2748): ( 5-32x32)	'Slug' sprite used in 'Spaceship' levels
+
+282(x011A)(   48): 		Palette ( 16 colors) used with sprites 284 to 290 (or world 2 levels 1 at offset 192, or levels 3, 4 and 35, at offset 208)
+283(x011B)(   48): 		Palette ( 16 colors) used with sprites 284 to 290 (or world 2 levels 34 and 37, at offset 208)
+284(x011C)( 4993): (13-32x32)	'Casked Runner'
+285(x011D)( 3976): (12-32x32)	'RIP'
+286(x011E)( 1152): ( 4-16x16)	Hazard door
+287(x011F)( 4320): (10-16x16)	Brown door
+288(x0120)(  216): ( 3- 8x 8)	Bubble Small
+289(x0121)(  864): ( 3-16x16)	Bubble Medium
+290(x0122)( 3456): ( 3-32x32)	Bubble Large
+
+291(x0123)(   48): 		Palette ( 16 colors) used with sprites 293 to 314 (or all world, at offset 144)
+292(x0124)(   48): 		Palette ( 16 colors) used with sprites 293 to 314 (or all world, at offset 160)
+
+***********	293(x0125)( 4608): Sprite without control bytes (4-32x32 ?)
+
+294(x0126)( 2304): ( 2-32x32)	Lava sprite
+295(x0127)( 1728): ( 6-16x16)	Flame ball
+296(x0128)( 1152): ( 1-32x32)	'Falling grey stone' sprite
+297(x0129)(  576): ( 2-16x16)	'Grey star exploding' sprite  used in all levels
+298(x012A)( 1152): ( 1-32x32)	Steel block sprite (128 9-bytes groups)
+299(x012B)( 2984): ( 7-32x32)	'Bubble' sprite used in 'Caves' level 11
+300(x012C)(  576): ( 2-16x16)	Switch sprite  object x13
+301(x012D)(  576): ( 2-16x16)	Push-button sprite used in all levels
+302(x012E)(  864): ( 3-16x16)	Red-Blue-Yellow keyholes sprite used in all levels
+303(x012F)( 4608): (16-16x16)	Collectibles sprite used in all levels
+304(x0130)(  288): ( 1-16x16)	Tools sprite
+305(x0131)( 1152): ( 4-16x16)	Lab tools sprite
+306(x0132)(  576): ( 2-16x16)	Eric and frame sprite
+307(x0133)( 2304): ( 2-32x32)	Female vikings (check color) sprite
+308(x0134)(  864): ( 3-16x16)	Padlocks sprite
+309(x0135)(  216): ( 2- 8x 8)	Tools Sprite
+310(x0136)( 1926): ( 3-32x32)	'Hyeroglyph'sprite
+311(x0137)(  576): ( 2-16x16)	'keyhole' sprite
+312(x0138)( 1152): ( 4-16x16)	Hyeroglyphs sprite
+313(x0139)( 1152): ( 4-16x16)	Coconuts sprite
+314(x013A)( 1440): ( 5-16x16)	Gold drop
+
+315(x013B)(   48): 		Palette ( 16 colors) used with sprites 316 to 360 (or world 4, all levels, at offset 192)
+316(x013C)( 1152): ( 1-32x32)	Stone block sprite
+317(x013D)(  288): ( 1-16x16)	Triangular stone sprite
+318(x013E)( 1152): ( 4-16x16)	Crumbling block sprite
+319(x013F)(  576): ( 1-32x32)	Piston sprite
+320(x0140)( 1152): ( 1-32x32)	Spikes sprite
+321(x0141)(  864): ( 1-48x16)	Steel truss sprite
+322(x0142)( 1060): ( 3-32x32)	Bomb sprite
+323(x0143)( 1463): ( 3-32x32)	'Old man with cane' sprite used in 'Caves' level 7
+324(x0144)( 1152): ( 1-32x32)	Elevator? sprite  used in 'Spaceship' levels
+325(x0145)( 3456): ( 1-96x32)	Crusher sprite
+326(x0146)(  576): ( 1-32x16)	Hazard block
+
+***********	327(x0147)( 2592): Magnet (size?) (64x18)
+
+328(x0148)( 2304): ( 2-32x32)	Seesaw sprite
+329(x0149)( 2304): ( 2-32x32)	Boxed spring sprite
+330(x014A)( 1152): ( 1-32x32)	Steel block sprite
+331(x014B)( 2304): ( 1-32x64)	Pneumatic pump sprite
+332(x014C)( 1152): ( 1-16x64)	Sprite
+333(x014D)(  864): ( 1-48x16)	Floor structure
+334(x014E)(  864): ( 1-16x48)	Steel cable (movable)
+335(x014F)(  216): ( 1-16x48)	Vertical spike
+336(x0150)(  864): ( 3-16x16)	3 steel blocks sprite
+337(x0151)( 1728): ( 3-16x32)	Dropping laval sprite
+338(x0152)( 1152): ( 4-16x16)	Crumbling brick wall sprite
+339(x0153)(  864): ( 1-48x16)	'Bridge' sprite
+340(x0154)( 1152): ( 1-32x32)	Hazard press sprite
+341(x0155)( 1152): ( 1-32x32)	Orange Steel block sprite
+342(x0156)(  576): ( 2-16x16)	'Target' sprite
+343(x0157)( 4608): ( 2-64x32)	Fan sprite (horizontal)
+344(x0158)(  432): ( 6- 8x 8)	Fan ribbons (horizontal)
+345(x0159)( 4608): ( 2-32x64)	Fan sprite (vertical)
+346(x015A)(  432): ( 6- 8x 8)	Fan ribbons (vertical)
+347(x015B)( 2304): ( 1-32x64)	Red monster elevator
+348(x015C)( 2304): ( 1-32x64)	'Fist' Piston
+349(x015D)( 1152): ( 1-16x64)	Small 'Punch' sprite
+350(x015E)( 1152): ( 4-16x16)	Crumbling wacky tile sprite  used in 'Candy' levels
+351(x015F)( 1152): ( 1-32x32)	Big wacky tile sprite
+352(x0160)( 1152): ( 4-16x16)	Crumbling checker tile sprite
+353(x0161)( 1728): ( 6-16x16)	'8' ball sprite
+
+	Tomator composite image 2x2 - 32-32 pixels
+354(x0162)( 4206): ( 7-32x32)	Top Left     'Tomator' sprite used in 'Spaceship' (2) last level
+355(x0163)( 4958): ( 7-32x32)	Top Right    'Tomator' sprite used in 'Spaceship' (2) last level
+356(x0164)( 4516): ( 7-32x32)	Bottom Left  'Tomator' sprite used in 'Spaceship' (2) last level
+357(x0165)( 4782): ( 7-32x32)	Bottom Right 'Tomator' sprite used in 'Spaceship' (2) last level
+
+358(x0166)( 1447): ( 4-32x32)	Sprite used with Tomator in 'Spaceship' (2) last level
+359(x0167)( 2304): ( 2-32x32)	Double switch sprite used in 'Spaceship' (2) last level
+360(x0168)( 2304): ( 1-64x32)	Hazard sprite used in 'Spaceship' (2) last level
+
+361(x0169)(   48): 		Palette (16 colors) used with sprite 362 (or world 7, levels 30 to 33, at offset 224)
+362(x016A)(  144): ( 2-16x16)	Red ball exploding
+
+
+====================================================================
+	World 7, level A
+363(x016B)(  768): 		Palette (256 colors) used in world 7, level A
+		World 7, level A: 'Farewell' scene, 320x240
+364(x016C)(  600): Level  A Tiles Map
+365(x016D)( 1200): Level  A Tiles Offsets
+366(x016E)(21952): Level  A Tiles Parts
+367(x016F)( 2744): Level  A Pixel Masks
+368(x0170)(25344): (2-32x176)	Lightning sprite
+369(x0171)(  344): Level  A
+
+	'Farewell' scene sprites
+370(x0172)(   48): 		Palette (16 colors) used with sprites 371 to 373
+371(x0173)( 6912): ( 1-64x96)	Baleog sprite in 'Farewell' scene
+372(x0174)( 6912): ( 1-64x96)	Eris sprite   in 'Farewell' scene
+373(x0175)( 6912): ( 1-64x96)	Olaf sprite   in 'Farewell' scene
+
+374(x0176)(   48): 		Palette (16 colors) used with sprites 375 to 378
+	'Farewell' boat Composite image 2x2 - 32-32 pixels
+375(x0177)( 2959): ( 1-32x32)	Top Left boat     in 'Farewell' scene
+376(x0178)( 1820): ( 1-32x32)	Top Right boat    in 'Farewell' scene
+377(x0179)( 2402): ( 1-32x32)	Bottom Left boat  in 'Farewell' scene
+378(x017A)( 1884): ( 1-32x32)	Bottom Right boat in 'Farewell' scene
+
+====================================================================
+	World 7, levels B and F ('The Lost Vikings' splash screen; 344 x 176 pixels)
+379(x017B)(  768): 		Palette (256 colors) used in world 7, levels B and F
+380(x017C)(60544): Level  B and F Tiles Map
+381(x017D)(  102): Level  B =382
+382(x017E)(  102): Level  F =381
+
+383(x017F)(   48): 		Palette ( 16 colors) used in '384' with palettes 369 and 218 at offset 228
+384(x0180)(22016): (1-344x64)	'The Lost Vikings' (text only)
+
+
+====================================================================
+	World 7, level C ('Blizzard Entertainment Classic Arcade' splash screen, top part,    344 x 176 pixels )
+385(x0181)(  768): 		Palette (256 colors) used in world 7, level C
+386(x0182)(60544): (1-344x176) Level  C Tiles Map
+387(x0183)(22016): (1-344x64)	'Blizzard Entertainment Classic Arcade' splash screen, bottom part
+388(x0184)(   84): Level  C
+
+
+====================================================================
+	World 7, level D: 'Blizzard Entertainment ' splash screen,    320 x 240 pixels
+389(x0185)(  768): 		Palette (256 colors) used in world 7, level D
+390(x0186)(  600): Level  D Tiles Map
+391(x0187)(  800): Level  D Tiles Offsets
+392(x0188)(17856): Level  D Tiles Parts
+393(x0189)( 2232): Level  D Pixel Masks
+394(x018A)(   81): Level  D
+
+
+====================================================================
+	World 7, level L
+395(x018B)(  768): 		Palette (256 colors) used in world 7, level L
+396(x018C)(60544): Level  L Tiles Map: Action area: Black screen
+397(x018D)(22016): Level  L, HUD area: Black screen
+398(x018E)(   84): Level  L
+
+
+====================================================================
+	World 7, level E (Galaxy, 320 x 224 pixels)
+399(x018F)(  384): 		Palette (128 colors) used in world 7, level D
+400(x0190)(  560): Level  E Tiles Map
+401(x0191)(  656): Level  E Tiles Offsets
+402(x0192)(14528): Level  E Tiles Parts
+403(x0193)( 1816): Level  E Pixel masks
+404(x0194)(  235): Level  E
+
+
+====================================================================
+Sprites used in scene between worlds when vikings are swirled around (palette 229)
+405(x0195)( 3238): Eric, top part
+406(x0196)( 2771): Eric, left part
+407(x0197)( 5399): Eric, bottom part=408
+408(x0198)( 5399): Eric, bottom part=407
+409(x0199)( 2959): Baleog, top part
+410(x019A)( 2665): Baleog, left part
+411(x019B)( 5264): Baleog, bottom part=412
+412(x019C)( 5264): Baleog, bottom part=411
+413(x019D)( 3766): Olaf=414
+414(x019E)( 3766): Olaf=413
+
+415(x019F)(  288): ( 1-16x16)	Yellow frame
+
+	'Game Over': Composite image 4x1 - 32-32 pixels
+416(x01A0)( 1132): 'G'
+417(x01A1)( 1049): 'ame'
+418(x01A2)( 1127): 'O'
+419(x01A3)( 1037): 'ver'
+
+420(x01A4)(  228): 'colored dots'
+421(x01A5)(  376): 'colored dots'
+422(x01A6)(  684): 'colored dots'
+423(x01A7)(  384): 'colored dots'
+424(x01A8)(  340): 'colored dots'
+
+
+425(x01A9)(   48): 		Palette ( 16 colors) with palette 404 at offset 0
+
+
+====================================================================
+	World 7, level G, H, I and J:  Forest Scene (used in scenes G, H and J) 2304 x 384 pixels
+426(x01AA)(27456): Level  G Tiles Parts
+427(x01AB)( 3432): Level  G Pixel Masks
+428(x01AC)( 3016): Level  G Tiles Offsets
+429(x01AD)( 6912): Level  G Tiles Map
+
+430(x01AE)( 9504): Sprite (24x44?)
+
+431(x01AF)(  384): 		Palette (128 colors) used in world 7, level J
+432(x01B0)(  384): 		Palette (128 colors) used in world 7, level G, H
+433(x01B1)(  456): Level  G
+434(x01B2)(  391): Level  H
+435(x01B3)(  178): Level  I
+436(x01B4)(  231): Level  J
+
+437(x01B5)(  288): ( 1-32x 8)	'Zzzz'
+438(x01B6)( 4608): 		two half-circles (128-32)
+439(x01B7)( 2880): 'Diamond'?
+
+440(x01B8)(   48): 		Palette ( 16 colors) used with sprite 441
+441(x01B9)( 3456): ( 1-96x32)	Tomator ship
+
+442(x01BA)(   48): 		Palette ( 16 colors) used with sprites 442 to 447
+443(x01BB)( 1507): ( 2-32x32)	Woman with toddler sprite
+444(x01BC)( 1350): Youngster sprite          (color?)
+
+445(x01BD)(  428): ( 1-32x32)	Colored pixels
+
+446(x01BE)(   12): Unknown
+447(x01BF)(  864): ( 3-16x16)	flames (on ship)
+
+448(x01C0)(   48): 		Palette (16 colors) used with sprites 449 and 450
+449(x01C1)( 1440): ( 4-16x16)	Turning character
+450(x01C2)(  680): ( 1-32x32)	Colored pixels
+
+
+====================================================================
+		Worlds
+451(x01C3)(48972): World 2 data file
+452(x01C4)(38998): World 3 data file
+453(x01C5)(42441): World 4 data file
+454(x01C6)(45316): World 5 data file
+455(x01C7)(43864): World 6 data file
+456(x01C8)(40785): World 7 data file
+
+
+====================================================================
+		Music: "Copyright (C) 1991,1992 Miles Design, Inc"
+457(x01C9)( 8434): Music data
+458(x01CA)(14775): Music data
+459(x01CB)(16257): Music data
+460(x01CC)(14825): Music data
+461(x01CD)(14825): Music data
+462(x01CE)(16357): Music data
+463(x01CF)(14775): Music data
+464(x01D0)(16333): Music data
+465(x01D1)(10707): Music data
+
+
+====================================================================
+	Sounds
+466(x01D2)(  102): Sound=471, 476, 481, 486, 491, 506, 511, 516, 517, 518, 519, 520, 526 and 530
+467(x01D3)( 6816): Sound
+468(x01D4)( 7856): Sound
+469(x01D5)( 9292): Sound
+470(x01D6)(10056): Sound
+471(x01D7)(  102): Sound
+472(x01D8)( 6710): Sound
+473(x01D9)( 6720): Sound
+474(x01DA)( 7836): Sound
+475(x01DB)( 7688): Sound
+476(x01DC)(  102): Sound=466
+477(x01DD)( 6208): Sound
+478(x01DE)( 6390): Sound
+479(x01DF)( 8908): Sound
+480(x01E0)(11284): Sound
+481(x01E1)(  102): Sound
+482(x01E2)( 6932): Sound
+483(x01E3)( 6824): Sound=493
+484(x01E4)( 6266): Sound=494
+485(x01E5)( 7790): Sound=495
+486(x01E6)(  102): Sound=466
+487(x01E7)(11924): Sound
+488(x01E8)(11142): Sound
+489(x01E9)(13060): Sound
+490(x01EA)(13494): Sound
+491(x01EB)(  102): Sound=466
+492(x01EC)( 6932): Sound=482
+493(x01ED)( 6824): Sound=483
+494(x01EE)( 6266): Sound=484
+495(x01EF)( 7790): Sound=485
+496(x01F0)( 1530): Sound
+497(x01F1)( 3302): Sound
+498(x01F2)( 4968): Sound
+499(x01F3)( 4334): Sound
+500(x01F4)( 5332): Sound
+501(x01F5)( 1368): Sound
+502(x01F6)( 2914): Sound
+503(x01F7)( 2584): Sound
+504(x01F8)( 1230): Sound
+505(x01F9)( 5576): Sound
+506(x01FA)(  102): Sound=466
+507(x01FB)( 7158): Sound
+508(x01FC)( 7166): Sound
+509(x01FD)( 8478): Sound
+510(x01FE)( 9900): Sound
+511(x01FF)(  102): Sound=466
+512(x0200)( 1424): Sound
+513(x0201)( 1426): Sound
+514(x0202)( 1968): Sound
+515(x0203)( 2442): Sound
+516(x0204)(  102): Sound=466
+517(x0205)(  102): Sound=466
+518(x0206)(  102): Sound=466
+519(x0207)(  102): Sound=466
+520(x0208)(  102): Sound=466
+521(x0209)(13808): Sound
+522(x020A)(19114): Sound
+523(x020B)(19114): Sound
+524(x020C)(18414): Sound
+525(x020D)(32590): Sound
+526(x020E)(  102): Sound=466
+
+527(x020F)( 6006): Unknown=528
+528(x0210)( 6006): Unknown=527
+529(x0211)(16258): Unknown
+
+530(x0212)(  102): Sound=466
+
+531(x0213)(22016): Logo used in HUD area, palette 534
+
+
+====================================================================
+		World 7, level I
+532(x0214)(60544): (1-344x176) Level  I Tiles Map: 'Stars', palette 534
+533(x0215)(22016): (1-344x64)  Level  I, HUD area: 'Stars'
+534(x0216)(  768): 		Palette used (256 colors) in world 7, level I
+
+535(x0217)(  420): Sound
+
+536(x0218)(    2): 'End of file' flag
+====================================================================
+-\\-
